@@ -65,14 +65,8 @@ DOTHERSIDE := None
 ifeq ($(detected_OS), Darwin)
 DOTHERSIDE := vendor/DOtherSide/build/lib/libDOtherSide.dylib
 else
-DOTHERSIDE := vendor/DOtherSide/build/lib/libDOtherSide.so
+DOTHERSIDE := vendor/DOtherSide/build/lib/libDOtherSideStatic.a
 endif
-
-APPIMAGETOOL := appimagetool-x86_64.AppImage
-
-$(APPIMAGETOOL):
-	wget https://github.com/AppImage/AppImageKit/releases/download/continuous/$(APPIMAGETOOL)
-	chmod +x $(APPIMAGETOOL)
 
 $(DOTHERSIDE): | deps
 	echo -e $(BUILD_MSG) "DOtherSide"
@@ -80,7 +74,13 @@ $(DOTHERSIDE): | deps
 		mkdir -p build && \
 		cd build && \
 		cmake -DCMAKE_BUILD_TYPE=Release .. $(HANDLE_OUTPUT) && \
-		$(MAKE) DOtherSide # IF WE WANT TO USE LIBDOTHERSIDE AS STATIC LIBRARY, USE `$(MAKE) DOtherSideStatic` INSTEAD
+		$(MAKE) DOtherSideStatic
+
+APPIMAGETOOL := appimagetool-x86_64.AppImage
+
+$(APPIMAGETOOL):
+	wget https://github.com/AppImage/AppImageKit/releases/download/continuous/$(APPIMAGETOOL)
+	chmod +x $(APPIMAGETOOL)
 
 STATUSGO := vendor/status-go/build/bin/libstatus.a
 
@@ -90,31 +90,33 @@ $(STATUSGO): | deps
 	  $(MAKE) setup-dev && \
 	  $(MAKE) statusgo-library
 
-
-STATUSGOWINDOWS := vendor/status-go/build/bin/libstatus.lib
-
-$(STATUSGOWINDOWS): | deps
-	echo -e $(BUILD_MSG) "status-go"
-	+ cd vendor/status-go && \
-	  $(MAKE) statusgo-library-windows
+# TODO: replace /home/richard/Qt/5.14.2/ for environment variables
 
 build-linux: $(DOTHERSIDE) $(STATUSGO) src/nim_status_client.nim | deps
 	echo -e $(BUILD_MSG) "$@" && \
-		$(ENV_SCRIPT) nim c -L:$(STATUSGO) -d:ssl -L:-lm $(NIM_PARAMS) -L:$(DOTHERSIDE) --outdir:./bin src/nim_status_client.nim
+	$(ENV_SCRIPT) nim c -d:ssl -L:$(STATUSGO) \
+											-L:$(DOTHERSIDE) \
+											-L:-L/home/richard/Qt/5.14.2/gcc_64/lib \
+											-L:-lQt5QuickControls2 -L:-lQt5Quick -L:-lQt5QmlModels -L:-lQt5Qml -L:-lQt5Network -L:-lQt5Widgets -L:-lQt5Gui -L:-lQt5Core \
+											-L:-lstdc++ \
+											-L:-lm \
+											$(NIM_PARAMS) --outdir:./bin src/nim_status_client.nim
 
 build-macos: $(DOTHERSIDE) $(STATUSGO) src/nim_status_client.nim | deps
 	echo -e $(BUILD_MSG) "$@" && \
-		$(ENV_SCRIPT) nim c -L:$(STATUSGO) -d:ssl -L:-lm -L:"-framework Foundation -framework Security -framework IOKit -framework CoreServices" $(NIM_PARAMS) -L:$(DOTHERSIDE) --outdir:./bin src/nim_status_client.nim
-
-build-windows: $(DOTHERSIDE) $(STATUSGOWINDOWS) src/nim_status_client.nim | deps
-	echo -e $(BUILD_MSG) "$@" && \
-		$(ENV_SCRIPT) nim c -d:mingw \
-											 -L:$(STATUSGOWINDOWS) \
-											 -L:-lsetupapi -L:-lhid \
-											 --outdir:./bin src/nim_status_client.nim
+		$(ENV_SCRIPT) nim c -d:ssl -L:$(STATUSGO) \
+												-L:$(DOTHERSIDE) \
+												-L:"-framework Foundation -framework Security -framework IOKit -framework CoreServices" \
+												-L:-L/home/richard/Qt/5.14.2/gcc_64/lib \
+												-L:-lQt5QuickControls2 -L:-lQt5Quick -L:-lQt5QmlModels -L:-lQt5Qml -L:-lQt5Network -L:-lQt5Widgets -L:-lQt5Gui -L:-lQt5Core \
+												-L:-lstdc++ \
+												-L:-lm  \
+												$(NIM_PARAMS)  --outdir:./bin src/nim_status_client.nim
 
 run:
-	LD_LIBRARY_PATH=vendor/DOtherSide/build/lib ./bin/nim_status_client
+	./bin/nim_status_client
+# TODO: might require QT/lib in LD_LIBRARY_PATH
+
 
 APPIMAGE := NimStatusClient-x86_64.AppImage
 
@@ -154,5 +156,36 @@ appimage: $(APPIMAGE)
 
 clean: | clean-common
 	rm -rf $(APPIMAGE) bin/* vendor/* tmp/dist
+
+# Cross compiling to windows
+
+DOTHERSIDEWINDOWS := vendor/DOtherSide/build/lib/libDOtherSideStaticWindows.a
+$(DOTHERSIDEWINDOWS): | deps
+	echo -e $(BUILD_MSG) "DOtherSide"
+	+ cd vendor/DOtherSide && \
+		mkdir -p build && \
+		cd build && \
+		cmake -DCMAKE_TOOLCHAIN_FILE=../mingw-w64-x86_64.cmake -DCMAKE_BUILD_TYPE=Release .. $(HANDLE_OUTPUT) && \
+		$(MAKE) DOtherSideStatic
+		mv $(DOTHERSIDE) $(DOTHERSIDEWINDOWS)
+
+STATUSGOWINDOWS := vendor/status-go/build/bin/libstatus.lib
+
+$(STATUSGOWINDOWS): | deps
+	echo -e $(BUILD_MSG) "status-go"
+	+ cd vendor/status-go && \
+	  $(MAKE) statusgo-library-windows
+
+build-windows: $(DOTHERSIDEWINDOWS) $(STATUSGOWINDOWS) src/nim_status_client.nim | deps
+	echo -e $(BUILD_MSG) "$@" && \
+		$(ENV_SCRIPT) nim c -d:mingw \
+											 -L:$(STATUSGOWINDOWS) \
+											 -L:-L/home/richard/Qt/5.14.2/windows \
+											 -L:-lQt5QuickControls2 -L:-lQt5Quick -L:-lQt5QmlModels -L:-lQt5Qml -L:-lQt5Network -L:-lQt5Widgets -L:-lQt5Gui -L:-lQt5Core \
+											 -L:$(DOTHERSIDEWINDOWS) \
+											 -L:-lstdc++ \
+											 -L:-lsetupapi -L:-lhid \
+											 --outdir:./bin src/nim_status_client.nim
+# /home/richard/Qt/5.14.2/windows  is the directory where the QT windows dll are located
 
 endif # "variables.mk" was not included
