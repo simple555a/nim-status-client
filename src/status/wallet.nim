@@ -7,6 +7,7 @@ import libstatus/accounts/constants as constants
 from libstatus/types import GeneratedAccount, DerivedAccount
 import wallet/balance_manager
 import wallet/account
+import wallet/collectibles
 export account
 
 type WalletModel* = ref object
@@ -66,6 +67,10 @@ proc populateAccount*(self: WalletModel, walletAccount: var WalletAccount, balan
   walletAccount.balance = fmt"{balance} {self.defaultCurrency}"
   walletAccount.assetList = assets
   walletAccount.realFiatBalance = 0.0
+  # Get NFTs
+  var collectibles = getCryptoKitties("0x01d0ea2aaf8f55f9d1a0383a439b78ebfeeef4ab")
+  debug "Collect", len=collectibles.len
+  # getCryptoKitties(walletAccount.address)
   updateBalance(walletAccount, self.getDefaultCurrency())
 
 proc newAccount*(self: WalletModel, name: string, address: string, iconColor: string, balance: string, publicKey: string): WalletAccount =
