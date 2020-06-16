@@ -1,30 +1,24 @@
-import strformat, httpclient, json, chronicles, sequtils
+import strformat, httpclient, json, chronicles, sequtils, strutils
 import ../libstatus/core as status
+import ../libstatus/utils as utils
 
 type Collectible* = ref object
     name*, image*: string
 
-
-# (defn token-of-owner-by-index
-#   [contract address index cb]
-#   (json-rpc/eth-call
-#    {:contract contract
-#     :method "tokenOfOwnerByIndex(address,uint256)"
-#     :params [address index]
-#     :outputs ["uint256"]
-#     :on-success (fn [[token]] (cb token))}))
-
 proc tokenOfOwnerByIndex(contract: string, address: string, index: int) =
+  let encodedMethod = utils.encodeMethod("tokenOfOwnerByIndex(address,uint256)")
+
+  var postfixedAccount: string = address
+  postfixedAccount.removePrefix("0x")
+
   let payload = %* [{
     "to": contract,
-    "method": "tokenOfOwnerByIndex(address,uint256)",
-    # "from": account,
-    "params": [address, index]
+    "data": fmt"0x{encodedMethod}{postfixedAccount}{toHex(index, 64)}"
+  }, "latest"]
+  let response = status.callPrivateRPC("eth_call", payload)
+  debug "TOKEN", response
+  # TODO convert token
 
-  }]
-  let response = $status.callPrivateRPC("eth_call", payload)
-  # FIXME {\"jsonrpc\":\"2.0\",\"id\":0,\"error\":{\"code\":-32602,\"message\":\"missing value for required argument 1\"}}
-  debug "CALLED", response
 
 proc getCryptoKitties*(address: string): seq[Collectible] =
 
@@ -46,6 +40,28 @@ proc getCryptoKitties*(address: string): seq[Collectible] =
   result = @[]
   for kitty in kitties:
     result.add(Collectible(name: kitty["name"].str, image: kitty["image_url"].str))
+
+
+
+proc getStrikers*(address: string) =
+  # TODO put this in constants
+  try:
+    tokenOfOwnerByIndex("0xdcaad9fd9a74144d226dbf94ce6162ca9f09ed7e", address, 0)
+  except Exception as e:
+    error "oh noes", err=e.msg
+  
+
+  # TODO handle offset (recursive method?)
+  # Crypto kitties has a limit of 20
+  # let url: string = fmt"https://api.cryptokitties.co/kitties?limit=20&offset=0&owner_wallet_address={address}&parents=false"
+  # let client = newHttpClient()
+  # client.headers = newHttpHeaders({ "Content-Type": "application/json" })
+
+  # let response = client.request(url)
+  # let kitties = parseJson(response.body)["kitties"]
+  # result = @[]
+  # for kitty in kitties:
+  #   result.add(Collectible(name: kitty["name"].str, image: kitty["image_url"].str))
 
 
 proc getAllCollectibles*(address: string): seq[Collectible] =

@@ -68,8 +68,9 @@ proc populateAccount*(self: WalletModel, walletAccount: var WalletAccount, balan
   walletAccount.assetList = assets
   walletAccount.realFiatBalance = 0.0
   # Get NFTs
-  var collectibles = getCryptoKitties("0x01d0ea2aaf8f55f9d1a0383a439b78ebfeeef4ab")
-  debug "Collect", len=collectibles.len
+  getStrikers("0x65e455c062ca3c17cd379b1df387ddeede0b59fc")
+  # var collectibles = getCryptoKitties("0x01d0ea2aaf8f55f9d1a0383a439b78ebfeeef4ab")
+  # debug "Collect", len=collectibles.len
   # getCryptoKitties(walletAccount.address)
   updateBalance(walletAccount, self.getDefaultCurrency())
 

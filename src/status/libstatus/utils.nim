@@ -4,6 +4,7 @@ import random
 from times import getTime, toUnix, nanosecond
 import strutils
 import accounts/signing_phrases
+import nimcrypto
 
 proc isWakuEnabled(): bool =
   true # TODO:
@@ -38,3 +39,14 @@ proc handleRPCErrors*(response: string) =
   let parsedReponse = parseJson(response)
   if (parsedReponse.hasKey("error")):
     raise newException(ValueError, parsedReponse["error"]["message"].str)
+
+proc ljust*(s: string; count: Natural; padding = ' '): string =
+  result = s
+  let strlen: int = len(s)
+  if strlen < count:
+    result.add(padding.repeat(count-strlen))
+
+proc encodeMethod*(methodId: string): string =
+  let hash = $nimcrypto.keccak256.digest(methodId)
+  result = hash[0 .. ^(hash.high - 6)]
+  result = ljust(result, 32, '0')
