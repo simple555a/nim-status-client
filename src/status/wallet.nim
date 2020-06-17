@@ -8,6 +8,7 @@ from libstatus/types import GeneratedAccount, DerivedAccount
 import wallet/balance_manager
 import wallet/account
 import wallet/collectibles
+from eth/common/utils import parseAddress
 export account
 
 type WalletModel* = ref object
@@ -68,7 +69,7 @@ proc populateAccount*(self: WalletModel, walletAccount: var WalletAccount, balan
   walletAccount.assetList = assets
   walletAccount.realFiatBalance = 0.0
   # Get NFTs
-  getStrikers("0x65e455c062ca3c17cd379b1df387ddeede0b59fc")
+  getStrikers(parseAddress("0x65e455c062ca3c17cd379b1df387ddeede0b59fc")) # TODO: use dynamic address here and remove import
   # var collectibles = getCryptoKitties("0x01d0ea2aaf8f55f9d1a0383a439b78ebfeeef4ab")
   # debug "Collect", len=collectibles.len
   # getCryptoKitties(walletAccount.address)

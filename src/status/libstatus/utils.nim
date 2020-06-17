@@ -4,7 +4,6 @@ import random
 from times import getTime, toUnix, nanosecond
 import strutils
 import accounts/signing_phrases
-import nimcrypto
 
 proc isWakuEnabled(): bool =
   true # TODO:
@@ -46,7 +45,4 @@ proc ljust*(s: string; count: Natural; padding = ' '): string =
   if strlen < count:
     result.add(padding.repeat(count-strlen))
 
-proc encodeMethod*(methodId: string): string =
-  let hash = $nimcrypto.keccak256.digest(methodId)
-  result = hash[0 .. ^(hash.high - 6)]
-  result = ljust(result, 32, '0')
+

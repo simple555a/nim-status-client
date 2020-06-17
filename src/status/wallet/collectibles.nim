@@ -1,30 +1,30 @@
 import strformat, httpclient, json, chronicles, sequtils, strutils
 import ../libstatus/core as status
 import ../libstatus/utils as utils
+import ../libstatus/contracts as contracts
+import eth/common/eth_types
 
 type Collectible* = ref object
     name*, image*: string
 
-proc tokenOfOwnerByIndex(contract: string, address: string, index: int) =
-  let encodedMethod = utils.encodeMethod("tokenOfOwnerByIndex(address,uint256)")
-
-  var postfixedAccount: string = address
-  postfixedAccount.removePrefix("0x")
+proc tokenOfOwnerByIndex(contract, address: EthAddress, index: int) =
+  let encodedMethod = contracts.encodeMethod("tokenOfOwnerByIndex(address,uint256)")
 
   let payload = %* [{
     "to": contract,
-    "data": fmt"0x{encodedMethod}{postfixedAccount}{toHex(index, 64)}"
+    "data": fmt"0x{encodedMethod}{contracts.encodeParam(address)}{contracts.encodeParam(index)}"
   }, "latest"]
   let response = status.callPrivateRPC("eth_call", payload)
   debug "TOKEN", response
   # TODO convert token
 
 
-proc getCryptoKitties*(address: string): seq[Collectible] =
+proc getCryptoKitties*(address: EthAddress): seq[Collectible] =
 
   # TODO put this in constants
   try:
-    tokenOfOwnerByIndex("0x06012c8cf97bead5deae237070f9587f8e7a266d", address, 0)
+    let contract = contracts.getContract(Network.Mainnet, "crypto-kitties")
+    tokenOfOwnerByIndex(contract.address, address, 0)
   except Exception as e:
     error "oh noes", err=e.msg
   
@@ -43,10 +43,11 @@ proc getCryptoKitties*(address: string): seq[Collectible] =
 
 
 
-proc getStrikers*(address: string) =
+proc getStrikers*(address: EthAddress) =
   # TODO put this in constants
   try:
-    tokenOfOwnerByIndex("0xdcaad9fd9a74144d226dbf94ce6162ca9f09ed7e", address, 0)
+    let contract = contracts.getContract(Network.Mainnet, "strikers")
+    tokenOfOwnerByIndex(contract.address, address, 0)
   except Exception as e:
     error "oh noes", err=e.msg
   
@@ -64,6 +65,6 @@ proc getStrikers*(address: string) =
   #   result.add(Collectible(name: kitty["name"].str, image: kitty["image_url"].str))
 
 
-proc getAllCollectibles*(address: string): seq[Collectible] =
+proc getAllCollectibles*(address: EthAddress): seq[Collectible] =
   result = concat(getCryptoKitties(address)) # TODO add other collectibles
 
