@@ -1,18 +1,18 @@
 import strformat, httpclient, json, chronicles, sequtils, strutils
 import ../libstatus/core as status
-import ../libstatus/utils as utils
+# import ../libstatus/utils as utils
 import ../libstatus/contracts as contracts
 import eth/common/eth_types
 
 type Collectible* = ref object
     name*, image*: string
 
-proc tokenOfOwnerByIndex(contract, address: EthAddress, index: int) =
+proc tokenOfOwnerByIndex(contractAddress, address: EthAddress, index: int) =
   let encodedMethod = contracts.encodeMethod("tokenOfOwnerByIndex(address,uint256)")
 
   let payload = %* [{
-    "to": contract,
-    "data": fmt"0x{encodedMethod}{contracts.encodeParam(address)}{contracts.encodeParam(index)}"
+    "to": $contractAddress,
+    "data": contracts.encodeAbi("tokenOfOwnerByIndex(address,uint256)", address, index) #fmt"0x{encodedMethod}{contracts.encodeParam(address)}{contracts.encodeParam(index)}"
   }, "latest"]
   let response = status.callPrivateRPC("eth_call", payload)
   debug "TOKEN", response
@@ -31,7 +31,7 @@ proc getCryptoKitties*(address: EthAddress): seq[Collectible] =
 
   # TODO handle offset (recursive method?)
   # Crypto kitties has a limit of 20
-  let url: string = fmt"https://api.cryptokitties.co/kitties?limit=20&offset=0&owner_wallet_address={address}&parents=false"
+  let url: string = fmt"https://api.cryptokitties.co/kitties?limit=20&offset=0&owner_wallet_address={$address}&parents=false"
   let client = newHttpClient()
   client.headers = newHttpHeaders({ "Content-Type": "application/json" })
 

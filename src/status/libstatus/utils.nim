@@ -39,10 +39,4 @@ proc handleRPCErrors*(response: string) =
   if (parsedReponse.hasKey("error")):
     raise newException(ValueError, parsedReponse["error"]["message"].str)
 
-proc ljust*(s: string; count: Natural; padding = ' '): string =
-  result = s
-  let strlen: int = len(s)
-  if strlen < count:
-    result.add(padding.repeat(count-strlen))
-
 

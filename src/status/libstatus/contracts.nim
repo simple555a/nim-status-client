@@ -1,7 +1,7 @@
-import sequtils, strformat, sugar, chronicles, typeinfo
+import sequtils, strformat, sugar, chronicles, typeinfo, macros
 import ./utils as status_utils
 import eth/common/eth_types, stew/byteutils, nimcrypto
-from eth/common/utils import `$`, parseAddress
+from eth/common/utils import parseAddress
 
 type
   Network* {.pure.} = enum
@@ -34,7 +34,7 @@ proc getContract*(network: Network, name: string): Contract =
 proc encodeMethod*(methodId: string): string =
   let hash = $nimcrypto.keccak256.digest(methodId)
   result = hash[0 .. ^(hash.high - 6)]
-  result = ljust(result, 32, '0')
+  result = &"{result:0<32}"
 
 proc encodeParam*[T](value: T): string =
   # Could possibly simplify this by passing a string value, like so:
@@ -44,10 +44,12 @@ proc encodeParam*[T](value: T): string =
   elif T is EthAddress:
     result = $value
 
-proc encodeAbi*(methodId: string, params: varargs[Any]): string =
-  result = "0x"
-  result &= encodeMethod(methodId)
-  debug ">>> result now = ", result=result
+macro encodeAbi*(methodId: string, params: varargs[untyped]): untyped =
+  result = quote do:
+    "0x" & encodeMethod(`methodId`)
   for param in params:
-    result &= encodeParam(param)
-    debug ">>> result now = ", result=result
+    result = quote do:
+      `result` & encodeParam(`param`)
+
+proc `$`*(a: EthAddress): string =
+  "0x" & a.toHex()
