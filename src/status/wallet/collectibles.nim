@@ -1,18 +1,15 @@
-import strformat, httpclient, json, chronicles, sequtils, strutils
+import strformat, httpclient, json, chronicles, sequtils, strutils, tables
 import ../libstatus/core as status
-# import ../libstatus/utils as utils
 import ../libstatus/contracts as contracts
 import eth/common/eth_types
 
 type Collectible* = ref object
     name*, image*: string
 
-proc tokenOfOwnerByIndex(contractAddress, address: EthAddress, index: int) =
-  let encodedMethod = contracts.encodeMethod("tokenOfOwnerByIndex(address,uint256)")
-
+proc tokenOfOwnerByIndex(contract: Contract, address: EthAddress, index: int) =
   let payload = %* [{
-    "to": $contractAddress,
-    "data": contracts.encodeAbi("tokenOfOwnerByIndex(address,uint256)", address, index) #fmt"0x{encodedMethod}{contracts.encodeParam(address)}{contracts.encodeParam(index)}"
+    "to": $contract.address,
+    "data": contract.methods["tokenOfOwnerByIndex"].encodeAbi(address, index) # contracts.encodeAbi("tokenOfOwnerByIndex(address,uint256)", address, index)
   }, "latest"]
   let response = status.callPrivateRPC("eth_call", payload)
   debug "TOKEN", response
@@ -24,7 +21,7 @@ proc getCryptoKitties*(address: EthAddress): seq[Collectible] =
   # TODO put this in constants
   try:
     let contract = contracts.getContract(Network.Mainnet, "crypto-kitties")
-    tokenOfOwnerByIndex(contract.address, address, 0)
+    tokenOfOwnerByIndex(contract, address, 0)
   except Exception as e:
     error "oh noes", err=e.msg
   
@@ -47,7 +44,7 @@ proc getStrikers*(address: EthAddress) =
   # TODO put this in constants
   try:
     let contract = contracts.getContract(Network.Mainnet, "strikers")
-    tokenOfOwnerByIndex(contract.address, address, 0)
+    tokenOfOwnerByIndex(contract, address, 0)
   except Exception as e:
     error "oh noes", err=e.msg
   

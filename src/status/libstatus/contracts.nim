@@ -1,4 +1,4 @@
-import sequtils, strformat, sugar, chronicles, typeinfo, macros
+import sequtils, strformat, sugar, chronicles, typeinfo, macros, tables
 import ./utils as status_utils
 import eth/common/eth_types, stew/byteutils, nimcrypto
 from eth/common/utils import parseAddress
@@ -7,11 +7,16 @@ type
   Network* {.pure.} = enum
     Mainnet,
     Testnet
+
+type Method = object
+  name: string
+  signature: string
     
 type Contract* = ref object
   name*: string
   network*: Network
   address*: EthAddress
+  methods*: Table[string, Method]
 
 let CONTRACTS: seq[Contract] = @[
   Contract(name: "snt", network: Network.Mainnet, address: parseAddress("0x744d70fdbe2ba4cf95131626614a1763df805b9e")),
@@ -23,7 +28,11 @@ let CONTRACTS: seq[Contract] = @[
   Contract(name: "sticker-market", network: Network.Testnet, address: parseAddress("0x6CC7274aF9cE9572d22DFD8545Fb8c9C9Bcb48AD")),
   Contract(name: "sticker-pack", network: Network.Mainnet, address: parseAddress("0x110101156e8F0743948B2A61aFcf3994A8Fb172e")),
   Contract(name: "sticker-pack", network: Network.Testnet, address: parseAddress("0xf852198d0385c4b871e0b91804ecd47c6ba97351")),
-  Contract(name: "strikers", network: Network.Mainnet, address: parseAddress("0xdcaad9fd9a74144d226dbf94ce6162ca9f09ed7e")),
+  Contract(name: "strikers", network: Network.Mainnet, address: parseAddress("0xdcaad9fd9a74144d226dbf94ce6162ca9f09ed7e"),
+    methods: [
+      ("tokenOfOwnerByIndex", Method(signature: "tokenOfOwnerByIndex(address,uint256)"))
+    ].toTable
+  ),
   Contract(name: "crypto-kitties", network: Network.Mainnet, address: parseAddress("0x06012c8cf97bead5deae237070f9587f8e7a266d")),
 ]
 
@@ -31,22 +40,22 @@ proc getContract*(network: Network, name: string): Contract =
   let found = CONTRACTS.filter(contract => contract.name == name and contract.network == network)
   result = if found.len > 0: found[0] else: nil
 
-proc encodeMethod*(methodId: string): string =
-  let hash = $nimcrypto.keccak256.digest(methodId)
+proc encodeMethod(self: Method): string =
+  let hash = $nimcrypto.keccak256.digest(self.signature)
   result = hash[0 .. ^(hash.high - 6)]
   result = &"{result:0<32}"
 
-proc encodeParam*[T](value: T): string =
+proc encodeParam[T](value: T): string =
   # Could possibly simplify this by passing a string value, like so:
   # https://github.com/status-im/nimbus/blob/4ade5797ee04dc778641372177e4b3e1851cdb6c/nimbus/config.nim#L304-L324
   when T is int:
     result = toHex(value, 64)
   elif T is EthAddress:
-    result = $value
+    result = value.toHex()
 
-macro encodeAbi*(methodId: string, params: varargs[untyped]): untyped =
+macro encodeAbi*(self: Method, params: varargs[untyped]): untyped =
   result = quote do:
-    "0x" & encodeMethod(`methodId`)
+    "0x" & encodeMethod(`self`)
   for param in params:
     result = quote do:
       `result` & encodeParam(`param`)
