@@ -64,6 +64,13 @@ type
     keyUid*: string
     photoPath*: string
 
+type
+  RpcResponse* = ref object
+    jsonrpc*: string
+    result*: string
+    id*: int
+    error*: string
+
 proc toAccount*(account: GeneratedAccount): Account =
   result = Account(name: account.name, photoPath: account.photoPath, keyUid: account.address)
 
@@ -75,3 +82,18 @@ type AccountArgs* = ref object of Args
 
 type
   StatusGoException* = object of Exception
+
+type
+  RpcException* = object of Exception
+
+type Sticker* = ref object
+  hash*: string
+
+type StickerPack* = ref object
+  author*: string
+  id*: int
+  name*: string
+  price*: int
+  preview*: string
+  stickers*: seq[Sticker]
+  thumbnail*: string

@@ -65,6 +65,10 @@ proc init*(self: ChatController) =
   self.status.mailservers.init()
   self.status.chat.init()
 
+  let installedStickers = self.status.chat.getInstalledStickers()
+  for sp in installedStickers:
+    self.view.addStickerPackToList(sp)
+
 proc handleMessage(self: ChatController, data: MessageSignal) =
   self.status.chat.update(data.chats, data.messages)
 

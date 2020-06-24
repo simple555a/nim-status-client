@@ -1,11 +1,15 @@
 import eventemitter, json
 import sequtils
 import libstatus/chat as status_chat
+import libstatus/wallet as status_wallet
+import libstatus/stickers as status_stickers
+import libstatus/types
 import ./profile as status_profile
 import chronicles
-import chat/[chat, message]
+import chat/[chat, message], wallet
 import ../signals/messages
 import tables
+from eth/common/utils import parseAddress
 
 type 
   ChatUpdateArgs* = ref object of Args
@@ -32,6 +36,7 @@ type
     channels*: Table[string, Chat]
     filters*: Table[string, string]
     msgCursor*: Table[string, string]
+    currentAccount*: WalletAccount
 
 proc newChatModel*(events: EventEmitter): ChatModel =
   result = ChatModel()
@@ -78,8 +83,22 @@ proc join*(self: ChatModel, chatId: string, chatType: ChatType) =
   self.events.emit("channelJoined", ChannelArgs(chat: chat))
   self.events.emit("activeChannelChanged", ChatIdArg(chatId: self.getActiveChannel()))
 
+proc getInstalledStickers*(self: ChatModel): seq[StickerPack] =
+  # TODO: needs more fleshing out to determine which sticker packs
+  # we own -- owned sticker packs will simply allowed them to be installed
+  discard status_stickers.getBalance(parseAddress(self.currentAccount.address))
+
+  result = status_stickers.getInstalledStickers()
+
 proc init*(self: ChatModel) =
   let chatList = status_chat.loadChats()
+
+  self.currentAccount = status_wallet.getWalletAccounts()[0] # TODO: make generic
+
+  # TODO: Temporarily install sticker packs as a first step. Later, once installation
+  # of sticker packs is supported, this should be removed, and a default "No
+  # stickers installed" view should show if no sticker packs are installed.
+  status_stickers.installStickers()
 
   var filters:seq[JsonNode] = @[]
   for chat in chatList:
@@ -138,6 +157,12 @@ proc formatChatUpdate(response: JsonNode): (seq[Chat], seq[Message]) =
 
 proc sendMessage*(self: ChatModel, chatId: string, msg: string): string =
   var sentMessage = status_chat.sendChatMessage(chatId, msg)
+  var (chats, messages) = formatChatUpdate(parseJson(sentMessage))
+  self.events.emit("chatUpdate", ChatUpdateArgs(messages: messages, chats: chats))
+  sentMessage
+
+proc sendSticker*(self: ChatModel, chatId: string, hash: string, pack: int): string =
+  var sentMessage = status_chat.sendStickerMessage(chatId, hash, pack)
   var (chats, messages) = formatChatUpdate(parseJson(sentMessage))
   self.events.emit("chatUpdate", ChatUpdateArgs(messages: messages, chats: chats))
   sentMessage

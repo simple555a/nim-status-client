@@ -3,6 +3,7 @@ import QtQuick.Controls 2.3
 import QtQuick.Layouts 1.3
 import Qt.labs.platform 1.1
 import QtGraphicalEffects 1.12
+import QtQuick.Controls 2.12 as QQC2
 import "../../../imports"
 import "../../../shared"
 import "./components"
@@ -41,6 +42,10 @@ Item {
     }
 
     AddChat {
+        anchors.right: parent.right
+        anchors.rightMargin: Theme.padding
+        anchors.top: parent.top
+        anchors.topMargin: 59
     }
 
     StackLayout {

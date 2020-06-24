@@ -30,6 +30,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 DISTFILES += \
+    ../../../../../Downloads/Stickers/history_icon.svg \
     ../fonts/InterStatus/InterStatus-Black.otf \
     ../fonts/InterStatus/InterStatus-BlackItalic.otf \
     ../fonts/InterStatus/InterStatus-Bold.otf \
@@ -51,8 +52,11 @@ DISTFILES += \
     Theme.qml \
     app/AppLayouts/Browser/BrowserLayout.qml \
     app/AppLayouts/Chat/ChatColumn.qml \
-    app/AppLayouts/Chat/ChatColumn/MessagesData.qml \
+    app/AppLayouts/Chat/ChatColumn/samples/MessagesData.qml \
+    app/AppLayouts/Chat/ChatColumn/samples/StickerData.qml \
+    app/AppLayouts/Chat/ChatColumn/samples/StickerPackData.qml \
     app/AppLayouts/Chat/ChatColumn/ChatInput.qml \
+    app/AppLayouts/Chat/ChatColumn/ChatButtons.qml \
     app/AppLayouts/Chat/ChatColumn/ChatMessages.qml \
     app/AppLayouts/Chat/ChatColumn/EmptyChat.qml \
     app/AppLayouts/Chat/ChatColumn/Message.qml \
@@ -60,7 +64,6 @@ DISTFILES += \
     app/AppLayouts/Chat/ChatColumn/qmldir \
     app/AppLayouts/Chat/ChatLayout.qml \
     app/AppLayouts/Chat/ContactsColumn.qml \
-    app/AppLayouts/Chat/ContactsColumn/AddChat.qml \
     app/AppLayouts/Chat/ContactsColumn/Channel.qml \
     app/AppLayouts/Chat/ContactsColumn/ChannelList.qml \
     app/AppLayouts/Chat/ContactsColumn/EmptyView.qml \
@@ -69,6 +72,7 @@ DISTFILES += \
     app/AppLayouts/Chat/components/PublicChatPopup.qml \
     app/AppLayouts/Chat/components/PrivateChatPopup.qml \
     app/AppLayouts/Chat/components/SuggestedChannel.qml \
+    app/AppLayouts/Chat/components/StickersPopup.qml \
     app/AppLayouts/Chat/components/qmldir \
     app/AppLayouts/Chat/qmldir \
     app/AppLayouts/Node/NodeLayout.qml \
@@ -125,6 +129,7 @@ DISTFILES += \
     app/img/close.svg \
     app/img/group_chat.svg \
     app/img/hash.svg \
+    app/img/history_icon.svg \
     app/img/message.svg \
     app/img/messageActive.svg \
     app/img/new_chat.svg \
@@ -133,6 +138,9 @@ DISTFILES += \
     app/img/public_chat.svg \
     app/img/search.svg \
     app/img/wallet.svg \
+    app/img/stickers_icon.svg \
+    app/img/stickers_icon_open.svg \
+    app/img/stickers_sad_icon.svg \
     app/img/walletActive.svg \
     app/qmldir \
     imports/qmldir \
@@ -170,10 +178,12 @@ DISTFILES += \
     onboarding/img/wallet@2x.jpg \
     onboarding/img/wallet@3x.jpg \
     onboarding/qmldir \
+    shared/AddButton.qml \
     shared/Input.qml \
     shared/ModalPopup.qml \
     shared/PopupMenu.qml \
-    shared/RoundImage.qml \
+    shared/Identicon.qml \
+    shared/RoundedImage.qml \
     shared/Select.qml \
     shared/Separator.qml \
     shared/StatusTabButton.qml \

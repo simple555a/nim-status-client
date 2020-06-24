@@ -47,7 +47,7 @@ proc sendTransaction*(self: WalletModel, from_value: string, to: string, value: 
   status_wallet.sendTransaction(from_value, to, value, password)
 
 proc getDefaultCurrency*(self: WalletModel): string =
-  status_settings.getSettings().parseJSON()["result"]["currency"].getStr
+  status_settings.getSetting("currency")
 
 proc setDefaultCurrency*(self: WalletModel, currency: string) =
   discard status_settings.saveSettings("currency", currency)

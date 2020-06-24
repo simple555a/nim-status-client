@@ -6,10 +6,13 @@ import chronicles
 import ../../status/status
 import ../../status/chat as status_chat
 import ../../status/chat/[chat, message]
+import ../../status/libstatus/types
 
 import views/channels_list
 import views/message_list
 import views/chat_item
+import views/sticker_pack_list
+import views/sticker_list
 
 logScope:
   topics = "chats-view"
@@ -22,6 +25,9 @@ QtObject:
       callResult: string
       messageList: Table[string, ChatMessageList]
       activeChannel*: ChatItemView
+      activeStickerPackId*: int
+      stickerPacks*: StickerPackList
+      stickers*: Table[int, StickerList]
 
   proc setup(self: ChatsView) = self.QAbstractListModel.setup
 
@@ -32,8 +38,34 @@ QtObject:
     result.status = status
     result.chats = newChannelsList()
     result.activeChannel = newChatItemView()
+    result.activeStickerPackId = -1
     result.messageList = initTable[string, ChatMessageList]()
+    result.stickerPacks = newStickerPackList()
+    result.stickers = initTable[int, StickerList]()
     result.setup()
+
+  proc addStickerPackToList*(self: ChatsView, stickerPack: StickerPack) =
+    discard self.stickerPacks.addStickerPackToList(stickerPack)
+    let stickerList = newStickerList()
+    for sticker in stickerPack.stickers:
+      discard stickerList.addStickerToList(sticker)
+    self.stickers[stickerPack.id] = stickerList
+  
+  proc getStickerPackList(self: ChatsView): QVariant {.slot.} =
+    newQVariant(self.stickerPacks)
+
+  QtProperty[QVariant] stickerPacks:
+    read = getStickerPackList
+
+  proc getStickerList(self: ChatsView): QVariant {.slot.} =
+    if self.activeStickerPackId > -1:
+      result = newQVariant(self.stickers[self.activeStickerPackId])
+    else:
+      result = newQVariant(newStickerList())
+
+  QtProperty[QVariant] stickers:
+    read = getStickerList
+    notify = activeStickerPackChanged
 
   proc getChatsList(self: ChatsView): QVariant {.slot.} =
     newQVariant(self.chats)
@@ -64,6 +96,23 @@ QtObject:
     read = getActiveChannelIdx
     write = setActiveChannelByIndex
     notify = activeChannelChanged
+  
+  proc activeStickerPackChanged*(self: ChatsView) {.signal.}
+
+  proc setActiveStickerPackById*(self: ChatsView, id: int) {.slot.} =
+    if self.activeStickerPackId == id:
+      return
+
+    self.activeStickerPackId = id
+    self.activeStickerPackChanged()
+
+  proc getactiveStickerPackId(self: ChatsView): QVariant {.slot.} =
+    newQVariant(self.activeStickerPackId)
+
+  QtProperty[QVariant] activeStickerPack:
+    read = getactiveStickerPackId
+    write = setActiveStickerPackByIndex
+    notify = activeStickerPackChanged
 
   proc setActiveChannel*(self: ChatsView, channel: string) =
     if(channel == ""): return
@@ -104,6 +153,9 @@ QtObject:
 
   proc sendMessage*(self: ChatsView, message: string) {.slot.} =
     discard self.status.chat.sendMessage(self.activeChannel.id, message)
+  
+  proc sendSticker*(self: ChatsView, hash: string, pack: int) {.slot.} =
+    discard self.status.chat.sendSticker(self.activeChannel.id, hash, pack)
 
   proc joinChat*(self: ChatsView, channel: string, chatTypeInt: int): int {.slot.} =
     self.status.chat.join(channel, ChatType(chatTypeInt))
