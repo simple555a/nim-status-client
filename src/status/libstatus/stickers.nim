@@ -6,7 +6,7 @@ import json, json_serialization, tables, strutils, sequtils
 # See https://notes.status.im/Q-sQmQbpTOOWCQcYiXtf5g#Read-Sticker-Packs-owned-by-a-user
 # for more details
 proc getBalance*(address: EthAddress): int =
-  let contract = contracts.getContract(Network.Mainnet, "sticker-pack")
+  let contract = contracts.getContract(Network.Testnet, "sticker-pack")
   let payload = %* [{
       "to": $contract.address,
       "data": contract.methods["balanceOf"].encodeAbi(address)
@@ -22,8 +22,8 @@ proc getBalance*(address: EthAddress): int =
 # See https://notes.status.im/Q-sQmQbpTOOWCQcYiXtf5g#Buy-a-Sticker-Pack for more
 # details
 proc buyPack*(packId: int, address: EthAddress, price: int, password: string): string =
-  let stickerMktContract = contracts.getContract(Network.Mainnet, "sticker-market")
-  let sntContract = contracts.getContract(Network.Mainnet, "sticker-market")
+  let stickerMktContract = contracts.getContract(Network.Testnet, "sticker-market")
+  let sntContract = contracts.getContract(Network.Testnet, "sticker-market")
   let buyTxAbiEncoded = stickerMktContract.methods["buyToken"].encodeAbi(packId, address, price)
   let approveAndCallAbiEncoded = sntContract.methods["approveAndCall"].encodeAbi($stickerMktContract.address, price, buyTxAbiEncoded)
   let payload = %* [{

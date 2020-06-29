@@ -128,7 +128,7 @@ proc getAccountSettings*(account: GeneratedAccount, defaultNetworks: JsonNode, i
       "mainnet": ["SNT"]
     },
     "appearance": 0,
-    "networks/current-network": "mainnet_rpc",
+    "networks/current-network": "rinkeby_rpc",
     "installation-id": installationId
   }
 
