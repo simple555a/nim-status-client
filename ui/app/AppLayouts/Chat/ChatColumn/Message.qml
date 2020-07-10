@@ -42,8 +42,8 @@ Item {
 
     property var profileClick: function () {}
     property var appSettings
-    id: messageWrapper
     width: parent.width
+    id: messageWrapper
     height: {
         switch(contentType){
             case Constants.chatIdentifier:
@@ -446,8 +446,8 @@ Item {
           }
           return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ? childrenRect.height : 24 + childrenRect.height)
         }
-        color: isCurrentUser ? Theme.blue : Theme.lightBlue
-        border.color: Theme.transparent
+        color: isCurrentUser ? Style.current.blue : Style.current.lightBlue
+        border.color: "transparent"
         width:  350 + 2 * chatHorizontalPadding
         radius: 16
         anchors.left: !isCurrentUser ? chatImage.right : undefined
@@ -455,7 +455,7 @@ Item {
         anchors.right: !isCurrentUser ? undefined : parent.right
         anchors.rightMargin: !isCurrentUser ? 0 : Theme.padding
         anchors.top: (index == 0) ? chatBox.bottom : parent.children[index-1].bottom
-        anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding: 0
+        anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding + 10 : 0
         visible: (isMessage || isEmoji) && messageWrapper.appSettings.displayChatImages && imageUrls != ""
 
         // Thi`s rectangle's only job is to mask the corner to make it less rounded... yep
