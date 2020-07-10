@@ -52,7 +52,7 @@ Item {
             case Constants.stickerType:
                 return stickerId.height + 50
             default:
-                return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ? childrenRect.height : 24 + childrenRect.height) + 20
+                return childrenRect.height
         }
     }
 
