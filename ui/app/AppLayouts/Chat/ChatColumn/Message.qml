@@ -43,6 +43,7 @@ Item {
     property var profileClick: function () {}
     property var appSettings
     width: parent.width
+    anchors.right: !isCurrentUser ? undefined : parent.right
     id: messageWrapper
     height: {
         switch(contentType){
@@ -369,19 +370,6 @@ Item {
             source: contentType === Constants.stickerType ? ("https://ipfs.infura.io/ipfs/" + sticker) : ""
             visible: contentType === Constants.stickerType
         }
-    }
-
-        /* Image { */
-        /*   id: imageMessage */
-        /*   horizontalAlignment: !isCurrentUser ? Text.AlignLeft : Text.AlignRight */
-        /*   anchors.left: parent.left */
-        /*   anchors.leftMargin: parent.chatHorizontalPadding */
-        /*   anchors.top: parent.top */
-        /*   anchors.topMargin: chatBox.chatVerticalPadding */
-        /*   sourceSize.width: 350 */
-        /*   source: message */
-        /*   visible: isImage */
-        /* } */
 
         StyledTextEdit {
             id: chatTime
@@ -403,101 +391,92 @@ Item {
             // Probably only want to show this when clicking?
             visible: true
         }
-        anchors.top: chatBox.bottom
-        anchors.topMargin: 4
-        anchors.bottomMargin: Style.current.padding
-        anchors.right: chatBox.right
-        anchors.rightMargin: isCurrentUser ? 5 : Style.current.padding
-        font.pixelSize: 10
-        readOnly: true
-        selectByMouse: true
-        visible: true
-    }
-
     
-    StyledTextEdit {
-        id: sentMessage
-        color: Style.current.darkGrey
-        text: outgoingStatus == "sent" ?
-        //% "Sent"
-        qsTrId("status-sent") :
-        //% "Sending..."
-        qsTrId("sending")
-        anchors.top: chatTime.top
-        anchors.bottomMargin: Style.current.padding
-        anchors.right: chatTime.left
-        anchors.rightMargin: 5
-        font.pixelSize: 10
-        readOnly: true
-        visible: isCurrentUser
+        StyledTextEdit {
+            id: sentMessage
+            color: Style.current.darkGrey
+            text: outgoingStatus == "sent" ?
+            //% "Sent"
+            qsTrId("status-sent") :
+            //% "Sending..."
+            qsTrId("sending")
+            anchors.top: chatTime.top
+            anchors.bottomMargin: Style.current.padding
+            anchors.right: chatTime.left
+            anchors.rightMargin: 5
+            font.pixelSize: 10
+            readOnly: true
+            visible: isCurrentUser
+        }
     }
 
     Repeater {
-      model: imageUrls.split(" ")
-      visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
-      Rectangle {
-        property int chatVerticalPadding: 7
-        property int chatHorizontalPadding: 12
-
-        id: chatBox2
-        height: {
-          if (!messageWrapper.appSettings.displayChatImages || imageUrls == "") {
-            return 0
-          }
-          return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ? childrenRect.height : 24 + childrenRect.height)
-        }
-        color: isCurrentUser ? Style.current.blue : Style.current.lightBlue
-        border.color: "transparent"
-        width:  350 + 2 * chatHorizontalPadding
-        radius: 16
-        anchors.left: !isCurrentUser ? chatImage.right : undefined
-        anchors.leftMargin: !isCurrentUser ? 8 : 0
-        anchors.right: !isCurrentUser ? undefined : parent.right
-        anchors.rightMargin: !isCurrentUser ? 0 : Theme.padding
-        anchors.top: (index == 0) ? chatBox.bottom : parent.children[index-1].bottom
-        anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding + 10 : 0
-        visible: (isMessage || isEmoji) && messageWrapper.appSettings.displayChatImages && imageUrls != ""
-
-        // Thi`s rectangle's only job is to mask the corner to make it less rounded... yep
+        model: imageUrls.split(" ")
+        visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
         Rectangle {
-            color: parent.color
-            width: 18
-            height: messageWrapper.appSettings.displayChatImages ? 18 : 0
-            anchors.bottom: parent.bottom
-            anchors.bottomMargin: 0
-            anchors.left: !isCurrentUser ? parent.left : undefined
-            anchors.leftMargin: 0
-            anchors.right: !isCurrentUser ? undefined : parent.right
-            anchors.rightMargin: 0
-            radius: 4
-            z: -1
-          }
+            property int chatVerticalPadding: 12
+            property int chatHorizontalPadding: 12
 
-          Image {
-            id: imageMessage
-            horizontalAlignment: !isCurrentUser ? Text.AlignLeft : Text.AlignRight
-            anchors.left: parent.left
-            anchors.leftMargin: parent.chatHorizontalPadding
-            anchors.top: parent.top
-            anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding : 0
-            sourceSize.width: 350
-            source: modelData
-            visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
-            onStatusChanged: {
-                if (imageMessage.status == Image.Error) {
-                  imageMessage.height = 0
-                  imageMessage.visible = false
-                  chatBox2.height = 0
-                  chatBox2.visible = false
+            id: chatBox2
+            height: {
+                if (!messageWrapper.appSettings.displayChatImages || imageUrls == "") {
+                    return 0
+                }
+                return 24 + imageMessage.height
+//                return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ?
+//                                      imageMessage.height :
+//                                      24 + imageMessage.height)
+            }
+            color: isCurrentUser ? Style.current.blue : Style.current.lightBlue
+            border.color: "transparent"
+            width:  imageMessage.width + 2 * chatHorizontalPadding
+            radius: 16
+            anchors.left: !isCurrentUser ? chatImage.right : undefined
+            anchors.leftMargin: !isCurrentUser ? 8 : 0
+            anchors.right: !isCurrentUser ? undefined : parent.right
+            anchors.rightMargin: !isCurrentUser ? 0 : Style.current.padding
+            anchors.top: (index == 0) ? chatBox.bottom : parent.children[index-1].bottom
+            anchors.topMargin: messageWrapper.appSettings.displayChatImages ? Style.current.smallPadding : 0
+            visible: (isMessage || isEmoji) && messageWrapper.appSettings.displayChatImages && imageUrls != ""
+
+            // This rectangle's only job is to mask the corner to make it less rounded... yep
+            Rectangle {
+                color: parent.color
+                width: 18
+                height: messageWrapper.appSettings.displayChatImages ? 18 : 0
+                anchors.bottom: parent.bottom
+                anchors.bottomMargin: 0
+                anchors.left: !isCurrentUser ? parent.left : undefined
+                anchors.leftMargin: 0
+                anchors.right: !isCurrentUser ? undefined : parent.right
+                anchors.rightMargin: 0
+                radius: 4
+                z: -1
+            }
+
+            Image {
+                id: imageMessage
+                anchors.horizontalCenter: parent.horizontalCenter
+                anchors.top: parent.top
+                anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding : 0
+                sourceSize.width: 350
+                source: modelData
+                visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
+                onStatusChanged: {
+                    if (imageMessage.status == Image.Error) {
+                        imageMessage.height = 0
+                        imageMessage.visible = false
+                        chatBox2.height = 0
+                        chatBox2.visible = false
+                    }
                 }
             }
-          }
-      }
+        }
     }
 }
 
 /*##^##
 Designer {
-    D{i:0;height:80;width:800}
+    D{i:0;formeditorColor:"#ffffff";height:80;width:800}
 }
 ##^##*/
