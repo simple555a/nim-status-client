@@ -26,7 +26,14 @@ Item {
     property string authorPrevMsg: "authorPrevMsg"
 
     property bool isEmoji: contentType === Constants.emojiType
-    property bool isMessage: contentType === Constants.messageType || contentType === Constants.stickerType 
+    property bool isMessage: contentType === Constants.messageType || contentType === Constants.stickerType
+    property bool isImage: {
+      let imgSourcePattern = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|].(?:jpg|jpeg|gif|png|svg))/gim;
+      if (!imgSourcePattern.test(message)) {
+        return false;
+      }
+      return true
+    }
     property bool isStatusMessage: contentType === Constants.systemMessagePrivateGroupType
 
     property int replyMessageIndex: chatsModel.messageList.getMessageIndex(responseTo);
@@ -34,7 +41,8 @@ Item {
     property string repliedMessageContent: replyMessageIndex > -1 ? chatsModel.messageList.getReplyData(replyMessageIndex, "message") : "";
 
     property var profileClick: function () {}
-
+    property var appSettings
+    id: messageWrapper
     width: parent.width
     height: {
         switch(contentType){
@@ -43,16 +51,16 @@ Item {
             case Constants.stickerType:
                 return stickerId.height + 50
             default:
-                return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ? chatBox.height : 24 + chatBox.height) + 20
+                return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ? childrenRect.height : 24 + childrenRect.height) + 20
         }
     }
 
     function linkify(inputText) {
-        //URLs starting with http://, https://, or ftp://
+        // URLs starting with http://, https://, or ftp://
         var replacePattern1 = /(\b(https?|ftp):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/gim;
         var replacedText = inputText.replace(replacePattern1, "<a href='$1'>$1</a>");
 
-        //URLs starting with "www." (without // before it, or it'd re-link the ones done above).
+        // URLs starting with "www." (without // before it, or it'd re-link the ones done above).
         var replacePattern2 = /(^|[^\/])(www\.[\S]+(\b|$))/gim;
         replacedText = replacedText.replace(replacePattern2, "$1<a href='http://$2'>$2</a>");
 
@@ -363,14 +371,37 @@ Item {
         }
     }
 
-    StyledTextEdit {
-        id: chatTime
-        color: Style.current.darkGrey
-        text: {
-            let messageDate = new Date(Math.floor(timestamp))
-            let minutes = messageDate.getMinutes();
-            let hours = messageDate.getHours();
-            return (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes)
+        /* Image { */
+        /*   id: imageMessage */
+        /*   horizontalAlignment: !isCurrentUser ? Text.AlignLeft : Text.AlignRight */
+        /*   anchors.left: parent.left */
+        /*   anchors.leftMargin: parent.chatHorizontalPadding */
+        /*   anchors.top: parent.top */
+        /*   anchors.topMargin: chatBox.chatVerticalPadding */
+        /*   sourceSize.width: 350 */
+        /*   source: message */
+        /*   visible: isImage */
+        /* } */
+
+        StyledTextEdit {
+            id: chatTime
+            color: Style.current.darkGrey
+            text: {
+                let messageDate = new Date(Math.floor(timestamp))
+                let minutes = messageDate.getMinutes();
+                let hours = messageDate.getHours();
+                return (hours < 10 ? "0" + hours : hours) + ":" + (minutes < 10 ? "0" + minutes : minutes)
+            }
+            anchors.top: contentType === Constants.stickerType ? stickerId.bottom : chatText.bottom
+            anchors.topMargin: 8
+            anchors.bottomMargin: Style.current.padding
+            anchors.right: parent.right
+            anchors.rightMargin: isCurrentUser ? 5 : Style.current.padding
+            font.pixelSize: 10
+            readOnly: true
+            selectByMouse: true
+            // Probably only want to show this when clicking?
+            visible: true
         }
         anchors.top: chatBox.bottom
         anchors.topMargin: 4
@@ -401,19 +432,67 @@ Item {
         visible: isCurrentUser
     }
 
-    // Thi`s rectangle's only job is to mask the corner to make it less rounded... yep
-    Rectangle {
-        color: chatBox.color
-        width: 18
-        height: 18
-        anchors.bottom: chatBox.bottom
-        anchors.bottomMargin: 0
-        anchors.left: !isCurrentUser ? chatBox.left : undefined
-        anchors.leftMargin: 0
-        anchors.right: !isCurrentUser ? undefined : chatBox.right
-        anchors.rightMargin: 0
-        radius: 4
-        z: -1
+    Repeater {
+      model: imageUrls.split(" ")
+      visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
+      Rectangle {
+        property int chatVerticalPadding: 7
+        property int chatHorizontalPadding: 12
+
+        id: chatBox2
+        height: {
+          if (!messageWrapper.appSettings.displayChatImages || imageUrls == "") {
+            return 0
+          }
+          return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ? childrenRect.height : 24 + childrenRect.height)
+        }
+        color: isCurrentUser ? Theme.blue : Theme.lightBlue
+        border.color: Theme.transparent
+        width:  350 + 2 * chatHorizontalPadding
+        radius: 16
+        anchors.left: !isCurrentUser ? chatImage.right : undefined
+        anchors.leftMargin: !isCurrentUser ? 8 : 0
+        anchors.right: !isCurrentUser ? undefined : parent.right
+        anchors.rightMargin: !isCurrentUser ? 0 : Theme.padding
+        anchors.top: (index == 0) ? chatBox.bottom : parent.children[index-1].bottom
+        anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding: 0
+        visible: (isMessage || isEmoji) && messageWrapper.appSettings.displayChatImages && imageUrls != ""
+
+        // Thi`s rectangle's only job is to mask the corner to make it less rounded... yep
+        Rectangle {
+            color: parent.color
+            width: 18
+            height: messageWrapper.appSettings.displayChatImages ? 18 : 0
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+            anchors.left: !isCurrentUser ? parent.left : undefined
+            anchors.leftMargin: 0
+            anchors.right: !isCurrentUser ? undefined : parent.right
+            anchors.rightMargin: 0
+            radius: 4
+            z: -1
+          }
+
+          Image {
+            id: imageMessage
+            horizontalAlignment: !isCurrentUser ? Text.AlignLeft : Text.AlignRight
+            anchors.left: parent.left
+            anchors.leftMargin: parent.chatHorizontalPadding
+            anchors.top: parent.top
+            anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding : 0
+            sourceSize.width: 350
+            source: modelData
+            visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
+            onStatusChanged: {
+                if (imageMessage.status == Image.Error) {
+                  imageMessage.height = 0
+                  imageMessage.visible = false
+                  chatBox2.height = 0
+                  chatBox2.visible = false
+                }
+            }
+          }
+      }
     }
 }
 

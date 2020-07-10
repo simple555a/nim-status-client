@@ -7,7 +7,9 @@ import "./components"
 import "./ChatColumn"
 
 StackLayout {
+    id: chatColumnLayout
     property int chatGroupsListViewCount: 0
+    property var appSettings
     Layout.fillHeight: true
     Layout.fillWidth: true
     Layout.minimumWidth: 300
@@ -34,6 +36,7 @@ StackLayout {
 
             ChatMessages {
                 messageList: chatsModel.messageList
+                appSettings: chatColumnLayout.appSettings
             }
        }
 

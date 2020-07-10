@@ -11,6 +11,7 @@ ScrollView {
     id: scrollView
     
     property var messageList: MessagesData {}
+    property var appSettings
     property bool loadingMessages: false
     property real scrollY: chatLogView.visibleArea.yPosition * chatLogView.contentHeight
 
@@ -128,6 +129,7 @@ ScrollView {
             authorCurrentMsg: msgDelegate.ListView.section
             authorPrevMsg: msgDelegate.ListView.previousSection
             profileClick: profilePopup.openPopup.bind(profilePopup)
+            appSettings: scrollView.appSettings
         }
     }
 
