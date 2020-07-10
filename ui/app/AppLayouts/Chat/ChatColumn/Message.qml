@@ -48,7 +48,7 @@ Item {
     height: {
         switch(contentType){
             case Constants.chatIdentifier:
-                return parent.parent.height - 100
+                return channelIdentifier.height + channelIdentifier.verticalMargin
             case Constants.stickerType:
                 return stickerId.height + 50
             default:
@@ -74,10 +74,13 @@ Item {
     }
 
     Item {
+        property int verticalMargin: 50
         id: channelIdentifier
         visible: authorCurrentMsg == ""
         anchors.horizontalCenter: parent.horizontalCenter
-        anchors.verticalCenter: parent.verticalCenter
+        anchors.top: parent.top
+        anchors.topMargin: this.visible ? verticalMargin : 0
+        height: this.visible ? childrenRect.height + verticalMargin : 0
         
         Rectangle {
             id: circleId
@@ -177,7 +180,6 @@ Item {
                 }
             }            
         }
-
     }
 
     // Private group Messages
