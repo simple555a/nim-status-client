@@ -410,25 +410,32 @@ Item {
             readOnly: true
             visible: isCurrentUser
         }
+
+        // This rectangle's only job is to mask the corner to make it less rounded... yep
+        Rectangle {
+            color: parent.color
+            width: 18
+            height: 18
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+            anchors.left: !isCurrentUser ? parent.left : undefined
+            anchors.leftMargin: 0
+            anchors.right: !isCurrentUser ? undefined : parent.right
+            anchors.rightMargin: 0
+            radius: 4
+            z: -1
+        }
     }
 
     Repeater {
-        model: imageUrls.split(" ")
+        model: messageWrapper.appSettings.displayChatImages && imageUrls != "" ? imageUrls.split(" ") : []
         visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
         Rectangle {
             property int chatVerticalPadding: 12
             property int chatHorizontalPadding: 12
 
             id: chatBox2
-            height: {
-                if (!messageWrapper.appSettings.displayChatImages || imageUrls == "") {
-                    return 0
-                }
-                return 24 + imageMessage.height
-//                return (isCurrentUser || (!isCurrentUser && authorCurrentMsg == authorPrevMsg) ?
-//                                      imageMessage.height :
-//                                      24 + imageMessage.height)
-            }
+            height: 24 + imageMessage.height
             color: isCurrentUser ? Style.current.blue : Style.current.lightBlue
             border.color: "transparent"
             width:  imageMessage.width + 2 * chatHorizontalPadding
@@ -438,14 +445,13 @@ Item {
             anchors.right: !isCurrentUser ? undefined : parent.right
             anchors.rightMargin: !isCurrentUser ? 0 : Style.current.padding
             anchors.top: (index == 0) ? chatBox.bottom : parent.children[index-1].bottom
-            anchors.topMargin: messageWrapper.appSettings.displayChatImages ? Style.current.smallPadding : 0
-            visible: (isMessage || isEmoji) && messageWrapper.appSettings.displayChatImages && imageUrls != ""
+            anchors.topMargin: Style.current.smallPadding
 
             // This rectangle's only job is to mask the corner to make it less rounded... yep
             Rectangle {
                 color: parent.color
                 width: 18
-                height: messageWrapper.appSettings.displayChatImages ? 18 : 0
+                height: 18
                 anchors.bottom: parent.bottom
                 anchors.bottomMargin: 0
                 anchors.left: !isCurrentUser ? parent.left : undefined
@@ -460,10 +466,9 @@ Item {
                 id: imageMessage
                 anchors.horizontalCenter: parent.horizontalCenter
                 anchors.top: parent.top
-                anchors.topMargin: messageWrapper.appSettings.displayChatImages ? chatBox2.chatVerticalPadding : 0
+                anchors.topMargin: chatBox2.chatVerticalPadding
                 sourceSize.width: 350
                 source: modelData
-                visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
                 onStatusChanged: {
                     if (imageMessage.status == Image.Error) {
                         imageMessage.height = 0
