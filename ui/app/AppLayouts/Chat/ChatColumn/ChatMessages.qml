@@ -22,11 +22,23 @@ ScrollView {
     ScrollBar.vertical.policy: chatLogView.contentHeight > chatLogView.height ? ScrollBar.AlwaysOn : ScrollBar.AlwaysOff
     ScrollBar.horizontal.policy: ScrollBar.AlwaysOff
 
+    function scrollToBottom(force, caller) {
+        if (!true && !chatLogView.atYEnd) {
+            // User has scrolled up, we don't want to scroll back
+            return
+        }
+        if (caller && caller !== chatLogView.itemAtIndex(chatLogView.count - 1)) {
+            // If we have a caller, only accept its request if it's the last message
+            return
+        }
+        Qt.callLater( chatLogView.positionViewAtEnd )
+    }
+
     ListView {
+        id: chatLogView
         anchors.fill: parent
         spacing: 4
         boundsBehavior: Flickable.StopAtBounds
-        id: chatLogView
         Layout.fillWidth: true
         Layout.fillHeight: true
 
@@ -37,17 +49,11 @@ ScrollView {
             }
 
             onActiveChannelChanged: {
-                Qt.callLater( chatLogView.positionViewAtEnd )
+                scrollToBottom(true)
             }
 
             onMessagePushed: {
-                if (!chatLogView.atYEnd) {
-                    // User has scrolled up, we don't want to scroll back
-                    return
-                }
-            
-                if(chatLogView.atYEnd)
-                    Qt.callLater( chatLogView.positionViewAtEnd )
+                scrollToBottom()
             }
         }
 
@@ -130,6 +136,8 @@ ScrollView {
             authorPrevMsg: msgDelegate.ListView.previousSection
             profileClick: profilePopup.openPopup.bind(profilePopup)
             appSettings: scrollView.appSettings
+
+            scrollToBottom: scrollView.scrollToBottom
         }
     }
 

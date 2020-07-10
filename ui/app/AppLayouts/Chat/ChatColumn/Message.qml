@@ -41,6 +41,7 @@ Item {
     property string repliedMessageContent: replyMessageIndex > -1 ? chatsModel.messageList.getReplyData(replyMessageIndex, "message") : "";
 
     property var profileClick: function () {}
+    property var scrollToBottom: function () {}
     property var appSettings
     width: parent.width
     anchors.right: !isCurrentUser ? undefined : parent.right
@@ -317,7 +318,7 @@ Item {
 
         StyledTextEdit {
             id: chatText
-            textFormat: TextEdit.RichText
+            textFormat: Text.RichText
             text: {
                 if(contentType === Constants.stickerType) return "";
                 if(isEmoji){
@@ -470,6 +471,8 @@ Item {
                         imageMessage.visible = false
                         imageChatBox.height = 0
                         imageChatBox.visible = false
+                    } else if (imageMessage.status == Image.Ready) {
+                        messageWrapper.scrollToBottom(true, messageWrapper)
                     }
                 }
             }
