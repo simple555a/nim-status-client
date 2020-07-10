@@ -427,58 +427,69 @@ Item {
         }
     }
 
-    Repeater {
-        model: messageWrapper.appSettings.displayChatImages && imageUrls != "" ? imageUrls.split(" ") : []
+
+    Rectangle {
+        property int chatVerticalPadding: 12
+        property int chatHorizontalPadding: 12
+        property int imageWidth: 350
+
+        id: imageChatBox
         visible: messageWrapper.appSettings.displayChatImages && imageUrls != ""
-        Rectangle {
-            property int chatVerticalPadding: 12
-            property int chatHorizontalPadding: 12
-
-            id: chatBox2
-            height: 24 + imageMessage.height
-            color: isCurrentUser ? Style.current.blue : Style.current.lightBlue
-            border.color: "transparent"
-            width:  imageMessage.width + 2 * chatHorizontalPadding
-            radius: 16
-            anchors.left: !isCurrentUser ? chatImage.right : undefined
-            anchors.leftMargin: !isCurrentUser ? 8 : 0
-            anchors.right: !isCurrentUser ? undefined : parent.right
-            anchors.rightMargin: !isCurrentUser ? 0 : Style.current.padding
-            anchors.top: (index == 0) ? chatBox.bottom : parent.children[index-1].bottom
-            anchors.topMargin: Style.current.smallPadding
-
-            // This rectangle's only job is to mask the corner to make it less rounded... yep
-            Rectangle {
-                color: parent.color
-                width: 18
-                height: 18
-                anchors.bottom: parent.bottom
-                anchors.bottomMargin: 0
-                anchors.left: !isCurrentUser ? parent.left : undefined
-                anchors.leftMargin: 0
-                anchors.right: !isCurrentUser ? undefined : parent.right
-                anchors.rightMargin: 0
-                radius: 4
-                z: -1
+        height: {
+            let h = chatVerticalPadding
+            for (let i = 0; i < imageRepeater.count; i++) {
+                h += imageRepeater.itemAt(i).height
             }
+            return h + chatVerticalPadding * imageRepeater.count
+        }
+        color: isCurrentUser ? Style.current.blue : Style.current.lightBlue
+        border.color: "transparent"
+        width:  imageWidth+ 2 * chatHorizontalPadding
+        radius: 16
+        anchors.left: !isCurrentUser ? chatImage.right : undefined
+        anchors.leftMargin: !isCurrentUser ? 8 : 0
+        anchors.right: !isCurrentUser ? undefined : parent.right
+        anchors.rightMargin: !isCurrentUser ? 0 : Style.current.padding
+        anchors.top: chatBox.bottom
+        anchors.topMargin: Style.current.smallPadding
+
+        Repeater {
+            id: imageRepeater
+            model: messageWrapper.appSettings.displayChatImages && imageUrls != "" ? imageUrls.split(" ") : []
 
             Image {
                 id: imageMessage
                 anchors.horizontalCenter: parent.horizontalCenter
-                anchors.top: parent.top
-                anchors.topMargin: chatBox2.chatVerticalPadding
-                sourceSize.width: 350
+                anchors.top: (index == 0) ? parent.top: parent.children[index-1].bottom
+                anchors.topMargin: imageChatBox.chatVerticalPadding
+                sourceSize.width: imageChatBox.imageWidth
                 source: modelData
                 onStatusChanged: {
                     if (imageMessage.status == Image.Error) {
                         imageMessage.height = 0
                         imageMessage.visible = false
-                        chatBox2.height = 0
-                        chatBox2.visible = false
+                        imageChatBox.height = 0
+                        imageChatBox.visible = false
                     }
                 }
             }
         }
+
+        // This rectangle's only job is to mask the corner to make it less rounded... yep
+        Rectangle {
+            color: parent.color
+            width: 18
+            height: 18
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 0
+            anchors.left: !isCurrentUser ? parent.left : undefined
+            anchors.leftMargin: 0
+            anchors.right: !isCurrentUser ? undefined : parent.right
+            anchors.rightMargin: 0
+            radius: 4
+            z: -1
+        }
+
     }
 }
 
