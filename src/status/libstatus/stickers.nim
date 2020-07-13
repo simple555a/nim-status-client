@@ -18,12 +18,14 @@ proc getBalance*(address: EthAddress): int =
     raise newException(RpcException, "Error getting stickers balance: " & response.error)
   result = fromHex[int](response.result)
 
+
+
 # Buys a sticker pack for user
 # See https://notes.status.im/Q-sQmQbpTOOWCQcYiXtf5g#Buy-a-Sticker-Pack for more
 # details
 proc buyPack*(packId: int, address: EthAddress, price: int, password: string): string =
   let stickerMktContract = contracts.getContract(Network.Testnet, "sticker-market")
-  let sntContract = contracts.getContract(Network.Testnet, "sticker-market")
+  let sntContract = contracts.getContract(Network.Testnet, "snt")
   let buyTxAbiEncoded = stickerMktContract.methods["buyToken"].encodeAbi(packId, address, price)
   let approveAndCallAbiEncoded = sntContract.methods["approveAndCall"].encodeAbi($stickerMktContract.address, price, buyTxAbiEncoded)
   let payload = %* [{

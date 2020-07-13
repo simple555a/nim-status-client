@@ -40,7 +40,10 @@ let CONTRACTS: seq[Contract] = @[
       ("balanceOf", Method(signature: "balanceOf(address)"))
     ].toTable
   ),
-  Contract(name: "sticker-pack", network: Network.Testnet, address: parseAddress("0xf852198d0385c4b871e0b91804ecd47c6ba97351")),
+  Contract(name: "sticker-pack", network: Network.Testnet, address: parseAddress("0xf852198d0385c4b871e0b91804ecd47c6ba97351"),
+    methods: [
+      ("balanceOf", Method(signature: "balanceOf(address)"))
+    ].toTable),
   # Strikers seems dead. Their website doesn't work anymore
   Contract(name: "strikers", network: Network.Mainnet, address: parseAddress("0xdcaad9fd9a74144d226dbf94ce6162ca9f09ed7e"),
     methods: [

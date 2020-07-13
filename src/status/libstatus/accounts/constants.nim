@@ -126,7 +126,7 @@ var NODE_CONFIG* = %* {
       "enode://30211cbd81c25f07b03a0196d56e6ce4604bb13db773ff1c0ea2253547fafd6c06eae6ad3533e2ba39d59564cfbdbb5e2ce7c137a5ebb85e99dcfc7a75f99f55@23.236.58.92:443"
     ]
   },
-  "DataDir": "./ethereum/rinkeby",
+  "DataDir": "./ethereum/ropsten",
   "EnableNTPSync": true,
   "KeyStoreDir": "./keystore",
   "ListenAddr": ":30304",
@@ -157,16 +157,16 @@ var NODE_CONFIG* = %* {
     "MaxMessageDeliveryAttempts": 6,
     "PFSEnabled": true,
     "VerifyENSContractAddress": "0x00000000000C2E074eC69A0dFb2997BA6C7d2e1e",
-    "VerifyENSURL": "https://rinkeby.infura.io/v3/f315575765b14720b32382a61a89341a",
+    "VerifyENSURL": "https://ropsten.infura.io/v3/f315575765b14720b32382a61a89341a",
     "VerifyTransactionChainID": 4,
-    "VerifyTransactionURL": "https://rinkeby.infura.io/v3/f315575765b14720b32382a61a89341a"
+    "VerifyTransactionURL": "https://ropsten.infura.io/v3/f315575765b14720b32382a61a89341a"
   },
   "StatusAccountsConfig": {
     "Enabled": true
   },
   "UpstreamConfig": {
     "Enabled": true,
-    "URL": "https://rinkeby.infura.io/v3/f315575765b14720b32382a61a89341a"
+    "URL": "https://ropsten.infura.io/v3/f315575765b14720b32382a61a89341a"
   },
   "WakuConfig": {
     "BloomFilterMode": nil,
