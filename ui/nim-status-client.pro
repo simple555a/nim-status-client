@@ -167,6 +167,8 @@ DISTFILES += \
     app/AppLayouts/Chat/ChatColumn/ChatMessages.qml \
     app/AppLayouts/Chat/ChatColumn/EmptyChat.qml \
     app/AppLayouts/Chat/ChatColumn/Message.qml \
+    app/AppLayouts/Chat/ChatColumn/SuggestionBox.qml \
+    app/AppLayouts/Chat/ChatColumn/SuggestionFilter.qml \
     app/AppLayouts/Chat/ChatColumn/TopBar.qml \
     app/AppLayouts/Chat/ChatColumn/qmldir \
     app/AppLayouts/Chat/ChatLayout.qml \

@@ -206,7 +206,7 @@ StackLayout {
                     let position = 0;
                     let text = ""
 
-                    if (currentText == "@") {
+                    if (currentText === "@") {
                         position = nameLen
                         text = "@" + aliasName + " "
                     } else {
