@@ -31,7 +31,7 @@ Rectangle {
     property alias suggestionsModel: filterItem.model
     property alias filter: filterItem.filter
     property alias property: filterItem.property
-    property alias cursorPosition: filterItem.cursorPosition
+    property int cursorPosition
     signal itemSelected(var item, int lastAtPosition, int lastCursorPosition)
 
 
@@ -64,6 +64,7 @@ Rectangle {
     SuggestionFilter {
         id: filterItem
         sourceModel: container.model
+        cursorPosition: container.cursorPosition
     }
 
 
