@@ -45,7 +45,7 @@ Item {
             .map(p => p.trim())
             .filter(p => !!item[p])
 
-        if (properties.length == 0 || this.filter.length == 0 || this.cursorPosition == 0) {
+        if (properties.length === 0 || this.filter.length === 0 || this.cursorPosition === 0) {
             return false
         }
 
@@ -59,7 +59,7 @@ Item {
         let hasWhiteSpaceBeforeAt = this.filter.charAt(this.cursorPosition - 2) === " "
         let hasWhiteSpaceAfterAt = this.filter.charAt(this.cursorPosition) === " "
 
-        if (this.filter == "@" ||
+        if (this.filter === "@" ||
           (hasAtBeforeCursor && hasWhiteSpaceBeforeAt && hasWhiteSpaceAfterAt) ||
           (this.cursorPosition === 1 && hasAtBeforeCursor && hasWhiteSpaceAfterAt) ||
           (cursorAtEnd && this.filter.endsWith("@") && hasWhiteSpaceBeforeAt)) {
