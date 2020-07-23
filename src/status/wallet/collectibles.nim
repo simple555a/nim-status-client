@@ -1,13 +1,14 @@
-import strformat, httpclient, json, chronicles, sequtils, strutils, tables
-from eth/common/utils import parseAddress
-import ../libstatus/core as status
-import ../libstatus/contracts as contracts
-import ../libstatus/types
-import eth/common/eth_types
-import ../libstatus/types
-import account
+import
+  strformat, httpclient, json, sequtils, strutils, tables
+import
+  chronicles, web3/[ethtypes, conversions], stint
 
-proc getTokenUri(contract: Contract, tokenId: Stuint[256]): string =
+import
+  ../libstatus/core as status, ../libstatus/contracts as contracts,
+  ../libstatus/[types, utils], account
+import ../libstatus/types
+
+proc getTokenUri(contract: Contract, tokenId: UInt256): string =
   try:
     let
       tokenUri = TokenUri(tokenId: tokenId)
@@ -28,7 +29,7 @@ proc getTokenUri(contract: Contract, tokenId: Stuint[256]): string =
     error "Error getting the token URI", mes = e.msg
     result = ""
 
-proc tokenOfOwnerByIndex(contract: Contract, address: EthAddress, index: Stuint[256]): int =
+proc tokenOfOwnerByIndex(contract: Contract, address: Address, index: UInt256): int =
   let
     tokenOfOwnerByIndex = TokenOfOwnerByIndex(address: address, index: index)
     payload = %* [{
@@ -41,7 +42,7 @@ proc tokenOfOwnerByIndex(contract: Contract, address: EthAddress, index: Stuint[
     return -1
   result = fromHex[int](res)
 
-proc tokensOfOwnerByIndex(contract: Contract, address: EthAddress): seq[int] =
+proc tokensOfOwnerByIndex(contract: Contract, address: Address): seq[int] =
   var index = 0
   var token: int
   result = @[]
@@ -52,7 +53,7 @@ proc tokensOfOwnerByIndex(contract: Contract, address: EthAddress): seq[int] =
     result.add(token)
     index = index + 1
 
-proc getCryptoKitties*(address: EthAddress): seq[Collectible] =
+proc getCryptoKitties*(address: Address): seq[Collectible] =
   result = @[]
   try:
     # TODO handle testnet -- does this API exist in testnet??
@@ -73,7 +74,7 @@ proc getCryptoKitties*(address: EthAddress): seq[Collectible] =
   except Exception as e:
     error "Error getting Cryptokitties", msg = e.msg
 
-proc getEthermons*(address: EthAddress): seq[Collectible] =
+proc getEthermons*(address: Address): seq[Collectible] =
   result = @[]
   try:
     let contract = getContract("ethermon")
@@ -99,12 +100,11 @@ proc getEthermons*(address: EthAddress): seq[Collectible] =
   except Exception as e:
     error "Error getting Ethermons", msg = e.msg
 
-proc getKudos*(address: EthAddress): seq[Collectible] =
+proc getKudos*(address: Address): seq[Collectible] =
   result = @[]
   try:
     let contract = getContract("kudos")
     if contract == nil: return
-    
     let tokens = tokensOfOwnerByIndex(contract, address)
 
     if (tokens.len == 0):

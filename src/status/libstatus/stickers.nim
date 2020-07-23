@@ -1,7 +1,7 @@
 import ./core as status, ./types, ./contracts, ./settings, ./edn_helpers
 import
   json, json_serialization, tables, chronicles, strutils, sequtils, httpclient,
-  stint, libp2p/[multihash, multicodec, cid], eth/common/eth_types
+  stint, libp2p/[multihash, multicodec, cid], web3
 from strutils import parseHexInt
 from nimcrypto import fromHex
 
@@ -56,7 +56,7 @@ proc decodeContentHash*(value: string): string =
 # Retrieves number of sticker packs owned by user
 # See https://notes.status.im/Q-sQmQbpTOOWCQcYiXtf5g#Read-Sticker-Packs-owned-by-a-user
 # for more details
-proc getBalance*(address: EthAddress): int =
+proc getBalance*(address: Address): int =
   let 
     contract = contracts.getContract("sticker-pack")
     balanceOf = BalanceOf(address: address)
@@ -126,7 +126,7 @@ proc getPackData*(id: Stuint[256]): StickerPack =
 # Buys a sticker pack for user
 # See https://notes.status.im/Q-sQmQbpTOOWCQcYiXtf5g#Buy-a-Sticker-Pack for more
 # details
-proc buyPack*(packId: Stuint[256], address: EthAddress, price: Stuint[256], password: string): string =
+proc buyPack*(packId: Stuint[256], address: Address, price: Stuint[256], password: string): string =
   let
     stickerMktContract = contracts.getContract("sticker-market")
     sntContract = contracts.getContract("snt")
@@ -148,7 +148,7 @@ proc buyPack*(packId: Stuint[256], address: EthAddress, price: Stuint[256], pass
     raise newException(RpcException, "Error getting stickers balance: " & response.error.message)
   result = response.result # should be a tx receipt
 
-proc tokenOfOwnerByIndex*(address: EthAddress, idx: Stuint[256]): int =
+proc tokenOfOwnerByIndex*(address: Address, idx: Stuint[256]): int =
   let
     contract = contracts.getContract("sticker-pack")
     tokenOfOwnerByIndex = TokenOfOwnerByIndex(address: address, index: idx)

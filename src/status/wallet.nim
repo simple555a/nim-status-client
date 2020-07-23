@@ -1,6 +1,5 @@
 import eventemitter, json, strformat, strutils, chronicles, sequtils
 import json_serialization
-from eth/common/utils import parseAddress
 import libstatus/accounts as status_accounts
 import libstatus/tokens as status_tokens
 import libstatus/settings as status_settings

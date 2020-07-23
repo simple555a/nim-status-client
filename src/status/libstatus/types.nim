@@ -116,9 +116,6 @@ type StickerPack* = object
 proc `%`*(stuint256: Stuint[256]): JsonNode =
   newJString($stuint256)
 
-proc `$`*(a: EthAddress): string =
-  "0x" & a.toHex()
-
 proc readValue*(reader: var JsonReader, value: var Stuint[256])
                {.raises: [IOError, SerializationError, Defect].} =
   try:

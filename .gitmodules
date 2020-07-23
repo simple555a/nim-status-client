@@ -46,9 +46,6 @@
 [submodule "vendor/nim-libp2p"]
 	path = vendor/nim-libp2p
 	url = https://github.com/status-im/nim-libp2p
-[submodule "vendor/nim-eth"]
-	path = vendor/nim-eth
-	url = https://github.com/status-im/nim-eth
 [submodule "vendor/nim-metrics"]
 	path = vendor/nim-metrics
 	url = https://github.com/status-im/nim-metrics
@@ -61,3 +58,24 @@
 [submodule "vendor/nim-status"]
 	path = vendor/nim-status
 	url = https://github.com/status-im/nim-status
+[submodule "vendor/nim-web3"]
+	path = vendor/nim-web3
+	url = https://github.com/emizzle/nim-web3/tree/refactor/move-encoding-functions
+[submodule "vendor/nim-json-rpc"]
+	path = vendor/nim-json-rpc
+	url = https://github.com/status-im/nim-json-rpc
+[submodule "vendor/nim-http-utils"]
+	path = vendor/nim-http-utils
+	url = https://github.com/status-im/nim-http-utils
+[submodule "vendor/news"]
+	path = vendor/news
+	url = https://github.com/Tormund/news
+[submodule "vendor/nim-bearssl"]
+	path = vendor/nim-bearssl
+	url = https://github.com/status-im/nim-bearssl
+[submodule "vendor/nim-eth"]
+	path = vendor/nim-eth
+	url = https://github.com/status-im/nim-eth
+[submodule "vendor/nim-secp256k1"]
+	path = vendor/nim-secp256k1
+	url = https://github.com/status-im/nim-secp256k1

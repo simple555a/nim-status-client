@@ -5,10 +5,9 @@ import ../../status/messages as messages_model
 import ../../signals/types
 import ../../status/libstatus/types as status_types
 import ../../status/libstatus/wallet as status_wallet
+import ../../status/libstatus/utils
 import ../../status/[chat, contacts, status]
 import view, views/channels_list, views/message_list
-
-from eth/common/utils import parseAddress
 
 logScope:
   topics = "chat-controller"

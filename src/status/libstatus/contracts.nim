@@ -1,11 +1,50 @@
-import sequtils, strformat, sugar, macros, tables, strutils
-import eth/common/eth_types, stew/byteutils, nimcrypto
-from eth/common/utils import parseAddress
-import ./types, ./settings, ./coder
+import
+  sequtils, strformat, sugar, macros, tables, strutils
 
-export
-  GetPackData, PackData, BuyToken, ApproveAndCall, Transfer, BalanceOf,
-  TokenOfOwnerByIndex, TokenPackId, TokenUri, DynamicBytes, toHex, fromHex
+import
+  stew/byteutils, nimcrypto, web3/[encoding, ethtypes], stint
+
+import
+  ./types, ./settings, ./utils
+
+type
+  GetPackData* = object
+    packId*: UInt256
+
+  PackData* = object
+    category*: DynamicBytes[32] # bytes4[]
+    owner*: Address # address
+    mintable*: bool # bool
+    timestamp*: UInt256 # uint256
+    price*: UInt256 # uint256
+    contentHash*: DynamicBytes[64] # bytes
+
+  BuyToken* = object
+    packId*: UInt256
+    address*: Address
+    price*: UInt256
+
+  ApproveAndCall* = object
+    to*: Address
+    value*: UInt256
+    data*: DynamicBytes[100]
+
+  Transfer* = object
+    to*: Address
+    value*: UInt256
+
+  BalanceOf* = object
+    address*: Address
+
+  TokenOfOwnerByIndex* = object
+    address*: Address
+    index*: UInt256
+
+  TokenPackId* = object
+    tokenId*: UInt256
+
+  TokenUri* = object
+    tokenId*: UInt256
 
 type Method* = object
   name*: string
@@ -14,7 +53,7 @@ type Method* = object
 type Contract* = ref object
   name*: string
   network*: Network
-  address*: EthAddress
+  address*: Address
   methods*: Table[string, Method]
 
 proc allContracts(): seq[Contract] = @[
@@ -100,6 +139,9 @@ proc getContract*(name: string): Contract =
   let network = settings.getCurrentNetwork()
   getContract(network, name)
 
+template toHex*[N](x: DynamicBytes[N]): string =
+  toHex(array[N, byte](x))
+
 proc encodeMethod(self: Method): string =
   ($nimcrypto.keccak256.digest(self.signature))[0..<8].toLower
 
@@ -124,6 +166,14 @@ proc encodeAbi*(self: Method, obj: object = RootObj()): string =
     else:
       result &= encoded.data
   result &= data
+
+# # TODO: Figure out a way to parse a bool as a FixedBytes[N], so that we can allow
+# # variance in the number of bytes. The current implementation is a very forceful
+# # way of parsing a bool because it assumes the bool is 32 bytes (64 chars).
+func decode*(input: string, offset: int, to: var bool): int {.inline.} =
+  let val = input[offset..offset+63].parse(Int256)
+  to = val.truncate(int) == 1
+  64
 
 func decodeContractResponse*[T](input: string): T =
   result = T()

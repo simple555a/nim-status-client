@@ -3,7 +3,6 @@ import nim_status, core, types, utils
 import ../wallet/account
 from ./accounts/constants import ZERO_ADDRESS
 import ./contracts as contractMethods
-from eth/common/utils as eth_utils import parseAddress
 
 proc getWalletAccounts*(): seq[WalletAccount] =
   try:

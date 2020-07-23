@@ -6,8 +6,7 @@ import libstatus/types
 import profile/profile
 import chat/[chat, message]
 import ../signals/messages
-import ens
-import eth/common/eth_types
+import ens, web3/ethtypes, stint
 
 logScope:
   topics = "chat-model"
@@ -98,7 +97,7 @@ proc join*(self: ChatModel, chatId: string, chatType: ChatType) =
 
   self.events.emit("channelJoined", ChannelArgs(chat: chat))
 
-proc getPurchasedStickerPacks*(self: ChatModel, address: EthAddress): seq[int] =
+proc getPurchasedStickerPacks*(self: ChatModel, address: Address): seq[int] =
   if self.purchasedStickerPacks != @[]:
     return self.purchasedStickerPacks
 

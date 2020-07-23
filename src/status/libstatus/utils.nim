@@ -1,6 +1,7 @@
 import json, random, strutils, strformat, tables
 import stint, nim_status
 from times import getTime, toUnix, nanosecond
+from web3 import Address, fromHex
 import accounts/signing_phrases
 
 proc isWakuEnabled(): bool =
@@ -76,3 +77,7 @@ proc find*[T](s: seq[T], pred: proc(x: T): bool {.closure.}): T {.inline.} =
   if results.len == 0:
     return default(type(T))
   result = results[0]
+  
+
+proc parseAddress*(strAddress: string): Address =
+  fromHex(Address, strAddress)
