@@ -1,5 +1,6 @@
-import NimQml, Tables, strformat, strutils, chronicles
-import ../../status/[status, wallet]
+import NimQml, Tables, strformat, strutils, chronicles, json
+import ../../status/[status, wallet, threads]
+import ../../status/wallet/collectibles as status_collectibles
 import views/[asset_list, account_list, account_item, transaction_list, collectibles_list]
 
 QtObject:
@@ -212,4 +213,17 @@ QtObject:
     self.setCurrentTransactions(self.status.wallet.getTransfersByAddress(address))
 
   proc loadCollectiblesForAccount*(self: WalletView, address: string) {.slot.} =
-    self.setCurrentCollectiblesList(self.status.wallet.getAllCollectibles(address))
+    spawnAndSend(self, "setCollectibles ") do:
+      $(%*status_collectibles.getAllCollectiblesJson(address))
+
+  proc collectiblesLoaded*(self: WalletView) {.signal.}
+
+  proc setCollectibles(self: WalletView, collectiblesJSON: string) {.slot.} =
+    echo "===================================================="
+    echo "SET COLLECTIBLES"
+    echo collectiblesJSON
+
+    #self.setCurrentCollectiblesList(collectiblesJSON)
+    #self.collectiblesLoaded()
+
+    #self.setCurrentCollectiblesList(self.status.wallet.getAllCollectibles(address))

@@ -118,3 +118,10 @@ proc getKudos*(address: EthAddress): seq[Collectible] =
 proc getAllCollectibles*(address: string): seq[Collectible] =
   let eth_address = parseAddress(address)
   result = concat(getCryptoKitties(eth_address), getEthermons(eth_address), getKudos(eth_address))
+
+proc getAllCollectiblesJson*(address: string): string =
+  let eth_address = parseAddress(address)
+  #echo $(%*getCryptoKitties(eth_address))
+  result = $(%*getEthermons(eth_address))
+  #echo $(%*getKudos(eth_address))
+  #$(%*concat(getCryptoKitties(eth_address), getEthermons(eth_address), getKudos(eth_address)))
