@@ -161,8 +161,10 @@ QtObject:
     result = fmt"{self.status.wallet.convertValue(fiatBalance, fiatSymbol, cryptoSymbol)}"
 
   proc getGasFiatValue*(self: WalletView, gweiValue: string, fiatSymbol: string): string {.slot.} =
-    echo "GWEI VALUE: ", gweiValue
-    let ethValue = gweiValue.parseInt() div 1000000000
+    # echo "GWEI VALUE: ", gweiValue
+    # let ethValue = gweiValue.parseInt() div 1000000000
+    # echo "ETH VALUE FROM GWEI ", fmt"{ethValue}"
+    let ethValue = "10".parseFloat() div 100
     echo "ETH VALUE FROM GWEI ", fmt"{ethValue}"
     result = self.getFiatValue(fmt"{ethValue}", "ETH", fiatSymbol)
 
