@@ -43,6 +43,10 @@ QtObject:
     result.totalFiatBalance = ""
     result.etherscanLink = ""
     result.defaultGasLimit = "160000"
+    result.safeLowGasPrice = "0"
+    result.standardGasPrice = "0"
+    result.fastGasPrice = "0"
+    result.fastestGasPrice = "0"
     result.setup
 
   proc etherscanLinkChanged*(self: WalletView) {.signal.}
@@ -169,9 +173,15 @@ QtObject:
     result = self.getFiatValue(fmt"{ethValue}", "ETH", fiatSymbol)
 
   proc getGasEthValue*(self: WalletView, gweiValue: string, gasLimit: string): string {.slot.} =
-    let weiValue = gweiValue.parseInt().u256 * 1000000000.u256 * gasLimit.parseInt().u256
+    var gweiValueInt:int
+    var gasLimitInt:int
+
+    discard gweiValue.parseInt(gweiValueInt)
+    discard gasLimit.parseInt(gasLimitInt)
+
+    let weiValue = gweiValueInt.u256 * 1000000000.u256 * gasLimitInt.u256
     let ethValue = wei2Eth(weiValue)
-    result = fmt"{ethValue}"
+    result = fmt"${ethValue}"
 
   proc generateNewAccount*(self: WalletView, password: string, accountName: string, color: string): string {.slot.} =
     result = self.status.wallet.generateNewAccount(password, accountName, color)

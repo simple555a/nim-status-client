@@ -64,13 +64,15 @@ Item {
 
         StatusSlider {
             id: gasSlider
-            minimumValue: root.slowestGasPrice
-            maximumValue: root.fastestGasPrice
+            from: root.slowestGasPrice
+            to: root.fastestGasPrice
             stepSize: root.stepSize
             value: root.resetGasSlider()
             onValueChanged: {
                 if (!isNaN(gasSlider.value)) {
+                    console.log("A")
                     labelGasPriceSummary.text = root.getGasEthValue(gasSlider.value, root.gasLimit)
+                    console.log(labelGasPriceSummary.text)
                 }
             }
             visible: root.selectedGasPrice == "" && root.selectedGasLimit == ""
