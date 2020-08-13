@@ -1,4 +1,4 @@
-import eventemitter, json, strformat, strutils, chronicles, sequtils
+import eventemitter, json, strformat, strutils, chronicles, sequtils, httpclient
 import json_serialization
 from eth/common/utils import parseAddress
 import libstatus/accounts as status_accounts
@@ -6,7 +6,7 @@ import libstatus/tokens as status_tokens
 import libstatus/settings as status_settings
 import libstatus/wallet as status_wallet
 import libstatus/accounts/constants as constants
-from libstatus/types import GeneratedAccount, DerivedAccount, Transaction, Setting
+from libstatus/types import GeneratedAccount, DerivedAccount, Transaction, Setting, GasPricePrediction
 import wallet/balance_manager
 import wallet/account
 import wallet/collectibles
@@ -187,3 +187,21 @@ proc validateMnemonic*(self: WalletModel, mnemonic: string): string =
   result = status_wallet.validateMnemonic(mnemonic).parseJSON()["error"].getStr
 
 proc getAllCollectibles*(self: WalletModel, address: string): seq[Collectible] = getAllCollectibles(address)
+
+proc getGasPricePredictions*(self: WalletModel): GasPricePrediction =
+  try:
+    let url: string = fmt"https://etherchain.org/api/gasPriceOracle"
+    let client = newHttpClient()
+    client.headers = newHttpHeaders({ "Content-Type": "application/json" })
+    let response = client.request(url)
+    let prediction = parseJson(response.body)
+    result = GasPricePrediction(
+      safeLow: prediction["safeLow"].getStr(),
+      standard: prediction["standard"].getStr(),
+      fast: prediction["fast"].getStr(),
+      fastest: prediction["fastest"].getStr()
+    )
+  except Exception as e:
+    echo "error getting gas price predictions"
+    echo e.msg
+

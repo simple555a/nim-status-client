@@ -1,4 +1,4 @@
-import NimQml, Tables, strformat, strutils, chronicles, json
+import NimQml, Tables, strformat, strutils, chronicles, json, std/wrapnils, parseUtils
 import ../../status/[status, wallet, threads]
 import ../../status/wallet/collectibles as status_collectibles
 import ../../status/libstatus/wallet as status_wallet
@@ -15,6 +15,10 @@ QtObject:
       status: Status
       totalFiatBalance: string
       etherscanLink: string
+      safeLowGasPrice: string
+      standardGasPrice: string
+      fastGasPrice: string
+      fastestGasPrice: string
 
   proc delete(self: WalletView) =
     self.accounts.delete
@@ -156,6 +160,12 @@ QtObject:
   proc getCryptoValue*(self: WalletView, fiatBalance: string, fiatSymbol: string, cryptoSymbol: string): string {.slot.} =
     result = fmt"{self.status.wallet.convertValue(fiatBalance, fiatSymbol, cryptoSymbol)}"
 
+  proc getGasFiatValue*(self: WalletView, gweiValue: string, fiatSymbol: string): string {.slot.} =
+    echo "GWEI VALUE: ", gweiValue
+    let ethValue = gweiValue.parseInt() div 1000000000
+    echo "ETH VALUE FROM GWEI ", fmt"{ethValue}"
+    result = self.getFiatValue(fmt"{ethValue}", "ETH", fiatSymbol)
+
   proc generateNewAccount*(self: WalletView, password: string, accountName: string, color: string): string {.slot.} =
     result = self.status.wallet.generateNewAccount(password, accountName, color)
 
@@ -269,3 +279,34 @@ QtObject:
     if address == self.currentAccount.address:
       self.setCurrentTransactions(transactions)
     self.loadingTrxHistory(false)
+
+  proc gasPricePredictionsChanged*(self: WalletView) {.signal.}
+
+  proc getGasPricePredictions*(self: WalletView) {.slot.} =
+    let prediction = self.status.wallet.getGasPricePredictions()
+    self.safeLowGasPrice = prediction.safeLow
+    self.standardGasPrice = prediction.standard
+    self.fastGasPrice = prediction.fast
+    self.fastestGasPrice = prediction.fastest
+    self.gasPricePredictionsChanged()
+
+  proc safeLowGasPrice*(self: WalletView): string {.slot.} = result = ?.self.safeLowGasPrice
+  QtProperty[string] safeLowGasPrice:
+    read = safeLowGasPrice
+    notify = gasPricePredictionsChanged
+
+  proc standardGasPrice*(self: WalletView): string {.slot.} = result = ?.self.standardGasPrice
+  QtProperty[string] standardGasPrice:
+    read = standardGasPrice
+    notify = gasPricePredictionsChanged
+
+  proc fastGasPrice*(self: WalletView): string {.slot.} = result = ?.self.fastGasPrice
+  QtProperty[string] fastGasPrice:
+    read = fastGasPrice
+    notify = gasPricePredictionsChanged
+
+  proc fastestGasPrice*(self: WalletView): string {.slot.} = result = ?.self.fastestGasPrice
+  QtProperty[string] fastestGasPrice:
+    read = fastestGasPrice
+    notify = gasPricePredictionsChanged
+

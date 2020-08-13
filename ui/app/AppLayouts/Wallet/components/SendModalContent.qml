@@ -105,6 +105,16 @@ Item {
         }
     }
 
+    GasSelector {
+      id: gasSelector
+      anchors.top: selectFromAccount.bottom
+      anchors.topMargin: Style.current.bigPadding
+      slowestValue: parseFloat(walletModel.safeLowGasPrice)
+      fastestValue: parseFloat(walletModel.fastestGasPrice)
+      getGasFiatValue: walletModel.getGasFiatValue
+      defaultCurrency: walletModel.defaultCurrency
+    }
+
     RecipientSelector {
         id: selectRecipient
         accounts: walletModel.accounts

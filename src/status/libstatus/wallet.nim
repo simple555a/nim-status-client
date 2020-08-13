@@ -108,6 +108,14 @@ proc getBalance*(address: string): string =
   else:  
     result = response["result"].str
 
+proc getGasPrice*(): string =
+  let response = parseJSON(callPrivateRPC("eth_getGasPrice"))
+  echo "RESPONSE: ", $response
+  if response.hasKey("error"):
+    raise newException(RpcException, "Error getting gas price: " & $response["error"])
+  else:
+    result = response["result"].str
+
 proc hex2Eth*(input: string): string =
   var value = fromHex(Stuint[256], input)
   result = utils.wei2Eth(value)

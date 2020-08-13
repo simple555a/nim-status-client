@@ -10,6 +10,7 @@ Button {
     property int btnBorderWidth: 0
     property color textColor: Style.current.blue
     property bool disabled: false
+    property int labelFontSize: 15
 
     id: btnStyled
     width: txtBtnLabel.width + 2 * Style.current.padding
@@ -27,7 +28,7 @@ Button {
     StyledText {
         id: txtBtnLabel
         color: btnStyled.disabled ? Style.current.darkGrey : btnStyled.textColor
-        font.pixelSize: 15
+        font.pixelSize: btnStyled.labelFontSize
         anchors.verticalCenter: parent.verticalCenter
         anchors.horizontalCenter: parent.horizontalCenter
         text: btnStyled.label
