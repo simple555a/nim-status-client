@@ -109,9 +109,10 @@ Item {
       id: gasSelector
       anchors.top: selectFromAccount.bottom
       anchors.topMargin: Style.current.bigPadding
-      slowestValue: parseFloat(walletModel.standardGasPrice)
-      fastestValue: parseFloat(walletModel.fastestGasPrice)
-      getGasFiatValue: walletModel.getGasFiatValue
+      slowestGasPrice: parseFloat(walletModel.safeLowGasPrice)
+      fastestGasPrice: parseFloat(walletModel.fastestGasPrice)
+      gasLimit: walletModel.defaultGasLimit
+      getGasEthValue: walletModel.getGasEthValue
       defaultCurrency: walletModel.defaultCurrency
     }
 
@@ -120,7 +121,7 @@ Item {
         accounts: walletModel.accounts
         contacts: profileModel.addedContacts
         label: qsTr("Recipient")
-        anchors.top: selectFromAccount.bottom
+        anchors.top: gasSelector.bottom
         anchors.topMargin: Style.current.padding
         anchors.left: parent.left
         anchors.right: parent.right

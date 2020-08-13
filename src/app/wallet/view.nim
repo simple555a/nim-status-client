@@ -20,6 +20,7 @@ QtObject:
       standardGasPrice: string
       fastGasPrice: string
       fastestGasPrice: string
+      defaultGasLimit: string
 
   proc delete(self: WalletView) =
     self.accounts.delete
@@ -41,6 +42,7 @@ QtObject:
     result.currentCollectiblesList = newCollectiblesList()
     result.totalFiatBalance = ""
     result.etherscanLink = ""
+    result.defaultGasLimit = "160000"
     result.setup
 
   proc etherscanLinkChanged*(self: WalletView) {.signal.}
@@ -165,6 +167,11 @@ QtObject:
     let weiValue = gweiValue.parseInt().u256 * 1000000000.u256
     let ethValue = wei2Eth(weiValue)
     result = self.getFiatValue(fmt"{ethValue}", "ETH", fiatSymbol)
+
+  proc getGasEthValue*(self: WalletView, gweiValue: string, gasLimit: string): string {.slot.} =
+    let weiValue = gweiValue.parseInt().u256 * 1000000000.u256 * gasLimit.parseInt().u256
+    let ethValue = wei2Eth(weiValue)
+    result = fmt"{ethValue}"
 
   proc generateNewAccount*(self: WalletView, password: string, accountName: string, color: string): string {.slot.} =
     result = self.status.wallet.generateNewAccount(password, accountName, color)
@@ -309,4 +316,8 @@ QtObject:
   QtProperty[string] fastestGasPrice:
     read = fastestGasPrice
     notify = gasPricePredictionsChanged
+
+  proc defaultGasLimit*(self: WalletView): string {.slot.} = result = ?.self.defaultGasLimit
+  QtProperty[string] defaultGasLimit:
+    read = defaultGasLimit
 
