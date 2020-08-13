@@ -109,7 +109,7 @@ Item {
       id: gasSelector
       anchors.top: selectFromAccount.bottom
       anchors.topMargin: Style.current.bigPadding
-      slowestValue: parseFloat(walletModel.safeLowGasPrice)
+      slowestValue: parseFloat(walletModel.standardGasPrice)
       fastestValue: parseFloat(walletModel.fastestGasPrice)
       getGasFiatValue: walletModel.getGasFiatValue
       defaultCurrency: walletModel.defaultCurrency

@@ -44,7 +44,9 @@ Item {
         stepSize: root.stepSize
         value: ((50 * (root.fastestValue - root.slowestValue) / 100) + root.slowestValue)
         onValueChanged: {
-            console.log("GAS FIAT VALUE: ", root.getGasFiatValue(gasSlider.value, root.defaultCurrency))
+            if (!isNaN(gasSlider.value)) {
+                // labelGasPriceSummary.text = root.getGasFiatValue(gasSlider.value, root.defaultCurrency))
+            }
         }
     }
 

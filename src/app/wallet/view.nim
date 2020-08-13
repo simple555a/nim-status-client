@@ -1,7 +1,8 @@
-import NimQml, Tables, strformat, strutils, chronicles, json, std/wrapnils, parseUtils
+import NimQml, Tables, strformat, strutils, chronicles, json, std/wrapnils, parseUtils, stint
 import ../../status/[status, wallet, threads]
 import ../../status/wallet/collectibles as status_collectibles
 import ../../status/libstatus/wallet as status_wallet
+import ../../status/libstatus/utils
 import views/[asset_list, account_list, account_item, transaction_list, collectibles_list]
 
 QtObject:
@@ -161,11 +162,8 @@ QtObject:
     result = fmt"{self.status.wallet.convertValue(fiatBalance, fiatSymbol, cryptoSymbol)}"
 
   proc getGasFiatValue*(self: WalletView, gweiValue: string, fiatSymbol: string): string {.slot.} =
-    # echo "GWEI VALUE: ", gweiValue
-    # let ethValue = gweiValue.parseInt() div 1000000000
-    # echo "ETH VALUE FROM GWEI ", fmt"{ethValue}"
-    let ethValue = "10".parseFloat() div 100
-    echo "ETH VALUE FROM GWEI ", fmt"{ethValue}"
+    let weiValue = gweiValue.parseInt().u256 * 1000000000.u256
+    let ethValue = wei2Eth(weiValue)
     result = self.getFiatValue(fmt"{ethValue}", "ETH", fiatSymbol)
 
   proc generateNewAccount*(self: WalletView, password: string, accountName: string, color: string): string {.slot.} =

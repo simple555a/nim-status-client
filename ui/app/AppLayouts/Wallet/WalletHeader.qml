@@ -71,7 +71,6 @@ Item {
         id: sendModal
         onOpened: {
           walletModel.getGasPricePredictions()
-          console.log("WHAT: ", parseFloat(walletModel.safeLowGasPrice))
         }
     }
 
