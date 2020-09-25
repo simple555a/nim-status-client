@@ -150,6 +150,12 @@ QtObject:
 
     if isAllowed: status.permissions.addPermission(data.hostname, data.permission)
 
+    let isAllowed = data.isAllowed and data.permission != Permissions.Unknown
+
+    info "API request received", host=data.hostname, value=data.permission, isAllowed
+
+    # TODO: if isAllowed, store permission grant
+
     return $ %* {
       "type": ResponseTypes.APIResponse,
       "isAllowed": isAllowed,
