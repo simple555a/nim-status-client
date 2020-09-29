@@ -65,13 +65,51 @@ Item {
             }
         }
 
+        Item {
+            id: dappPermissions
+            anchors.top: backupSeedPhrase.bottom
+            anchors.topMargin: Style.current.padding
+            height: dappPermissionsText.height
+            width: parent.width
+
+            StyledText {
+                id: dappPermissionsText
+                text: qsTr("Set DApp access permissions")
+                font.pixelSize: 15
+            }
+
+            SVGImage {
+                id: caret2
+                anchors.right: parent.right
+                anchors.rightMargin: 0
+                anchors.verticalCenter: dappPermissionsText.verticalCenter
+                source: "../../../img/caret.svg"
+                width: 13
+                height: 7
+                rotation: -90
+            }
+            
+            ColorOverlay {
+                anchors.fill: caret2
+                source: caret
+                color: Style.current.darkGrey
+                rotation: -90
+            }
+
+            MouseArea {
+                anchors.fill: parent
+                onClicked: backupSeedModal.open()
+                cursorShape: Qt.PointingHandCursor
+            }
+        }
+
         BackupSeedModal {
             id: backupSeedModal
         }
 
         Separator {
             id: separator
-            anchors.top: backupSeedPhrase.bottom
+            anchors.top: dappPermissions.bottom
             anchors.topMargin: Style.current.bigPadding
         }
         StatusSectionHeadline {
