@@ -568,12 +568,14 @@ Rectangle {
                                         anchors.top: bookmarkImage.bottom
                                         anchors.topMargin: Style.current.halfPadding
                                     }
-
                                 }
                                 MouseArea {
                                     anchors.fill: bookmarkItem
                                     cursorShape: Qt.PointingHandCursor
-                                    onClicked: console.log('Go to bookmark')
+                                    onClicked: {
+                                        browserModel.addBookmark("https://google.com")
+                                        console.log('Go to bookmark')
+                                    }
                                 }
                             }
                         }

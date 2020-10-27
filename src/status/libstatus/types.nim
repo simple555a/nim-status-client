@@ -150,6 +150,7 @@ type
 
   Setting* {.pure.} = enum
     Appearance = "appearance",
+    Bookmarks = "bookmarks",
     Currency = "currency"
     EtherscanLink = "etherscan-link"
     InstallationId = "installation-id"
@@ -189,3 +190,8 @@ type PendingTransactionType* {.pure.} = enum
   ReleaseENS = "ReleaseENS",
   BuyStickerPack = "BuyStickerPack"
   WalletTransfer = "WalletTransfer" 
+
+type Bookmark* = ref object
+  name*: string
+  url*: string
+  image*: string
